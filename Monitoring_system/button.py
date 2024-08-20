@@ -10,8 +10,8 @@ import serial
 import struct
 # Receiver Thread
 class Receiver(QThread):
-    detected = pyqtSignal(bytes)
-    updateSensorValue = pyqtSignal(int)
+    detected = pyqtSignal(int)
+    updateSensorValue = pyqtSignal(int) #maybe (int,int,int,int)
     def __init__(self, conn, parent=None):
         super(Receiver, self).__init__(parent)
         self.is_running =False
@@ -29,16 +29,16 @@ class Receiver(QThread):
                     res = res[:-2]
                     cmd = res[:2].decode()
                     if cmd =="GS":
-                        self.flame_value1 = int.from_bytes(res[2:6])
-                        self.gas_value1 = int.from_bytes(res[6:10])
-                        self.flame_value2 = int.from_bytes(res[10:14])
-                        self.gas_value2 = int.from_bytes(res[14:18])
+                        self.flame_value1 = int.from_bytes(res[2:6],"little")
+                        self.gas_value1 = int.from_bytes(res[6:10],"little")
+                        self.flame_value2 = int.from_bytes(res[10:14],"little")
+                        self.gas_value2 = int.from_bytes(res[14:18],"little")
                         self.updateSensorValue.emit(self.flame_value1, self.gas_value2, self.flame_value2, self.gas_value2)
                     elif cmd == "GR":
-                        self.detected.emit(res[2])
+                        self.detected.emit(int.from_bytes(res[2:6],"little"))
                     else:
                         print("unknown error")
-                        print(int.from_bytes(res))
+                        print(res)
     def stop(self):
         print("recv stop")
         self.is_running =False
@@ -60,7 +60,7 @@ class Camera(QThread):
     def stop(self):
         self.running = False
 
-from_class = uic.loadUiType("/home/zeki/dev_ws/cv_qt/source/Project/tmp_fire_admin.ui")[0]
+from_class = uic.loadUiType("/home/zeki/dev_ws/git_ws/iot-repo-4/Monitoring_system/tmp_fire_admin.ui")[0]
 
 class WindowClass(QMainWindow, from_class) :
     def __init__(self):
@@ -263,10 +263,11 @@ class WindowClass(QMainWindow, from_class) :
             if self.prev_IS != self.curr_IS:
                 self.send_safeC(b'IS',self.curr_IS,self.sensor_loc) #self.curr_IS is int
 
+            if self.indoor_flag == False:
+                self.RFID_timer.start()
+                self.clickCamera() #displayCamera check indoor_flag and turn on if flag is true, off when false
+                                        # or separate to activeCamera() deactiveCamera()
             self.indoor_flag = True
-            self.RFID_timer.start()
-            self.clickCamera() #displayCamera check indoor_flag and turn on if flag is true, off when false
-                                    # or separate to activeCamera() deactiveCamera()
             self.enable_cam_deactivate()
             if 1 in [self.flag_list[0],self.flag_list[2]]:
                 self.enable_ventilation_button()
@@ -321,6 +322,7 @@ class WindowClass(QMainWindow, from_class) :
         self.ventilation_flag = False
 
         self.flag_list = [0,0,0,0]
+        self.cam_label.clear()
 
         print("deactivateButton")
 
@@ -384,15 +386,15 @@ class WindowClass(QMainWindow, from_class) :
             self.cam_label.setPixmap(self.pixmap)
 
     def clickCamera(self):
-        if self.isCameraOn == False:
-            self.btn_camera.setText('Camera off')
+        if self.indoor_flag == False:
+            # self.btn_camera.setText('Camera off')
             self.isCameraOn = True
             # self.btn_record.show()
             # self.btn_capture.show()
 
             self.cameraStart()
         else:
-            self.btn_camera.setText('Camera on')
+            # self.btn_camera.setText('Camera on')
             self.isCameraOn = False
             # self.btn_record.hide()
             # self.btn_capture.hide()
