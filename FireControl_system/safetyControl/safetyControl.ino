@@ -4,22 +4,25 @@
 
 const int RST_PIN = 9;
 const int SS_PIN = 10;
-int R_LED = 1;
-int Y_LED = 2;
-int BUZZER = 3;
+int R_LED = 2;
+int Y_LED = 3;
+int BUZZER = 4;
 
 MFRC522 rc522(SS_PIN, RST_PIN);
 MFRC522::MIFARE_Key key;
 
-Servo fan_servo;
-Servo door_servo;
-Servo cam_hor_servo;
 Servo cam_ver_servo;
+Servo cam_hor_servo;
+
+Servo fan_servo;
+Servo door_top_servo;
+Servo door_btm_servo;
+
 
 int indoor_stat = 0;
 int prev_pos = 0;
 
-int default_pos[3][2] = {{0, 0}, {10, 10}, {20, 20}};
+int default_pos[3][2] = {{105, 30}, {60, 40}, {150, 40}}; //middle, right, left (front door pov)
 int degree_xy[2] = {0, 0};
 
 const byte adminCards[2][4] = {
@@ -55,8 +58,7 @@ void deactivateAlarm() {
   digitalWrite(R_LED, LOW);
   digitalWrite(Y_LED, LOW);
   noTone(BUZZER);
-  door_servo.write(0);
-  // door_servo.detach();
+  door_top_servo.write(0);
   fan_activation(0);
 }
 
@@ -74,14 +76,17 @@ void setup() {
   pinMode(Y_LED, OUTPUT);
   pinMode(BUZZER, OUTPUT);
 
-  fan_servo.attach(A3);
-  door_servo.attach(A4);
+  cam_ver_servo.attach(A0);
   cam_hor_servo.attach(A1);
-  cam_ver_servo.attach(A2);
+
+  fan_servo.attach(A3);
+  door_top_servo.attach(A4);
+  door_btm_servo.attach(A5);
 
   // Set initial positions
   fan_servo.write(0);
-  door_servo.write(0);
+  door_top_servo.write(0);
+  door_btm_servo.write(0);
   cam_hor_servo.write(degree_xy[0]);
   cam_ver_servo.write(degree_xy[1]);
 
@@ -135,9 +140,9 @@ void loop() {
         digitalWrite(R_LED, HIGH);
         digitalWrite(Y_LED, LOW);
         tone(BUZZER, 500);
-        door_servo.write(120);
-        delay(10);
-        // door_servo.detach();
+        door_top_servo.write(120);
+        door_btm_servo.write(120);
+        delay(15);
         // Serial.println("IS - Flame(1) SafetyControl");
       }
 
@@ -145,11 +150,11 @@ void loop() {
         digitalWrite(R_LED, LOW);
         digitalWrite(Y_LED, HIGH);
         tone(BUZZER, 500);
-        door_servo.write(120);
-        delay(10);
+        door_top_servo.write(120);
+        door_btm_servo.write(120);
+        delay(15);
         fan_activation(1);
-        delay(10);
-        // door_servo.detach();
+        delay(15);
         // Serial.println("IS - Gas(2) SafetyControl");
 
       }
@@ -158,9 +163,9 @@ void loop() {
         digitalWrite(R_LED, HIGH);
         digitalWrite(Y_LED, HIGH);
         tone(BUZZER, 5000);
-        door_servo.write(120);
-        delay(10);
-        // door_servo.detach();
+        door_top_servo.write(120);
+        door_btm_servo.write(120);
+        delay(15);
         // Serial.println("IS - Both(3) SafetyControl");
       }
 
@@ -217,7 +222,8 @@ void loop() {
       else {
       memset(send_buffer, 0x00, sizeof(send_buffer)); //clear the send_buffer
       memset(send_buffer, "GR", 2); // Add GR to the send buffer
-      auth_state = 0;
+      // send_buffer[2] = 3; //0 unknown error
+      auth_state = 3;
       memset(send_buffer + 2, &auth_state, sizeof(auth_state)); // Add auth state to the send buffer
       send_buffer[6] = '\n';
 
