@@ -38,11 +38,11 @@ void fan_activation(int activate) {
     int pos = 0;
     for (pos = 0; pos <= 180; pos += 5) {
       fan_servo.write(pos); //start fan rotation (180 degrees)
-      delay(10);
+      delay(15);
     }
     for (pos = 180; pos >= 0; pos -= 5) {
       fan_servo.write(pos); //start fan rotation (90 degrees)
-      delay(10);
+      delay(15);
     }
   }
   else {
@@ -59,6 +59,9 @@ void deactivateAlarm() {
   digitalWrite(Y_LED, LOW);
   noTone(BUZZER);
   door_top_servo.write(0);
+  door_btm_servo.write(0);
+  cam_hor_servo.write(0);
+  cam_ver_servo.write(0);
   fan_activation(0);
 }
 
@@ -222,12 +225,13 @@ void loop() {
       else {
       memset(send_buffer, 0x00, sizeof(send_buffer)); //clear the send_buffer
       memset(send_buffer, "GR", 2); // Add GR to the send buffer
-      // send_buffer[2] = 3; //0 unknown error
-      auth_state = 3;
+      // send_buffer[2] = 0; //0 unknown error
+      auth_state = 0;
       memset(send_buffer + 2, &auth_state, sizeof(auth_state)); // Add auth state to the send buffer
       send_buffer[6] = '\n';
 
       Serial.write(send_buffer, 7);     // Send response
+      
       Serial.println();
       // Serial.println("Unknown/No card. Please try again.");
       }
