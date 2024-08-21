@@ -110,7 +110,7 @@ class WindowClass(QMainWindow, from_class) :
         # connection of fireDetect_Unit
         while self.fire_conn_flag == False and self.try_count < 5:
             try:
-                self.fire_conn = serial.Serial(port='/dev/ttyACM1',baudrate= 9600, timeout=1000)
+                self.fire_conn = serial.Serial(port='/dev/ttyACM0',baudrate= 9600, timeout=1000)
                 self.fire_conn_flag = True
             except:
                 self.fire_conn_flag = False
@@ -128,7 +128,7 @@ class WindowClass(QMainWindow, from_class) :
         # connection of safetyControl_Unit
         while self.safety_conn_flag == False and self.try_count < 5:
             try:
-                self.safety_conn = serial.Serial(port='/dev/ttyACM0',baudrate= 9600, timeout=1)
+                self.safety_conn = serial.Serial(port='/dev/ttyACM1',baudrate= 9600, timeout=1)
                 self.safety_conn_flag = True
             except:
                 self.safety_conn_flag = False
@@ -232,12 +232,12 @@ class WindowClass(QMainWindow, from_class) :
         self.flag_list[1]=(1 if (self.gas_value1 > self.gas_criterion) else self.flag_list[1])
         self.flag_list[2]=(1 if (self.flame_value2 > self.flame_criterion) else self.flag_list[2])
         self.flag_list[3]=(1 if (self.gas_value2 > self.gas_criterion) else self.flag_list[3])
-
+        
         if self.sensor_loc == 0:
             if 1 in self.flag_list:
-                if self.flag_list.index(1)/2 == 0:
+                if 1 in self.flag_list[0:2]:
                     self.sensor_loc = 1
-                elif self.flag_list.index(1)/2 == 1:
+                elif 1 in self.flag_list[2:]:
                     self.sensor_loc = 2
                 else:
                     pass
@@ -245,6 +245,7 @@ class WindowClass(QMainWindow, from_class) :
                 self.sensor_loc = 0
         gas_fire_flag = (self.flag_list[1]+self.flag_list[3] != 0, self.flag_list[0]+self.flag_list[2] != 0)
         print(gas_fire_flag)
+        print(self.flag_list.index(1)/2)
         if True in gas_fire_flag:
             if gas_fire_flag == (False, True):
                 self.prev_IS = self.curr_IS
@@ -262,7 +263,7 @@ class WindowClass(QMainWindow, from_class) :
             
             if self.prev_IS != self.curr_IS:
                 self.send_safeC(b'IS',self.curr_IS,self.sensor_loc) #self.curr_IS is int
-
+                print(self.flag_list)
             if self.indoor_flag == False:
                 self.RFID_timer.start()
                 self.clickCamera() #displayCamera check indoor_flag and turn on if flag is true, off when false
