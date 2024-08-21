@@ -121,8 +121,8 @@ class WindowClass(QMainWindow, from_class) :
         # setting variables
         self.sensor_timer_interval = 500
         self.RFID_timer_interval = 500
-        self.flame_criterion =200
-        self.gas_criterion = 200
+        self.flame_criterion =300
+        self.gas_criterion = 300
 
         # default flags
         self.fire_conn_flag = False
@@ -460,7 +460,7 @@ class WindowClass(QMainWindow, from_class) :
         #     self.mp4Stop()
         self.camera.running = True
         self.camera.start()
-        self.video = cv2.VideoCapture(-1)
+        self.video = cv2.VideoCapture(2)
     
     def cameraStop(self):
         self.camera.running = False
