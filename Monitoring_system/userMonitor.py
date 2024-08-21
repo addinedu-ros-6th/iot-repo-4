@@ -8,32 +8,68 @@ import time
 import datetime
 import serial 
 import struct
+
+flame_value1 = 0
+flame_value2 = 0
+gas_value1 = 0
+gas_value2 = 0
+
 # Receiver Thread
 class Receiver(QThread):
     detected = pyqtSignal(int)
-    updateSensorValue = pyqtSignal(int) #maybe (int,int,int,int)
+    # updateSensorValue = pyqtSignal(int) #maybe (int,int,int,int)
+    updateSensorValue = pyqtSignal()
     def __init__(self, conn, parent=None):
         super(Receiver, self).__init__(parent)
         self.is_running =False
         self.conn = conn
         print("recv init")
     def run(self):
+        global flame_value1, flame_value2, gas_value1, gas_value2
         print("recv start")
         self.is_running = True
+        flame_value1 = 50
         while (self.is_running == True):
             if self.conn.readable():
                 res = self.conn.read_until(b'\n')
+                # res = self.conn.read(4)
                 if len(res) > 0:
                     print("loook at herererere")
                     print(res)
-                    res = res[:-2]
+                    print(int.from_bytes(res,"little"))
+                    res = res[:-1] # origin res = res[:2]
                     cmd = res[:2].decode()
                     if cmd =="GS":
-                        self.flame_value1 = int.from_bytes(res[2:6],"little")
-                        self.gas_value1 = int.from_bytes(res[6:10],"little")
-                        self.flame_value2 = int.from_bytes(res[10:14],"little")
-                        self.gas_value2 = int.from_bytes(res[14:18],"little")
-                        self.updateSensorValue.emit(self.flame_value1, self.gas_value2, self.flame_value2, self.gas_value2)
+                        print("im GGGGGGGGGGGGSSSSSSSSSSS")
+                        flame_value1 = int.from_bytes(res[2:6],"little")
+                        gas_value1 = int.from_bytes(res[6:10],"little")
+                        flame_value2 = int.from_bytes(res[10:14],"little")
+                        gas_value2 = int.from_bytes(res[14:18],"little")
+
+                        # flame_value1= self.conn.readline().strip() # Testtttttttttingggggg
+                        # flame_value1 = int.from_bytes(flame_value1,"little")
+                        # gas_value1 = struct.unpack('<I', res[6:10])[0]
+                        # flame_value2 = struct.unpack('<I', res[10:14])[0]
+                        # gas_value2 = struct.unpack('<I', res[14:18])[0]
+                        # self.updateSensorValue.emit(flame_value1, gas_value1, flame_value2, gas_value2)
+                        # res = res[2:]
+                        # print(res)
+                        # flame_value1 = struct.unpack('>I', res[:4])[0]
+                        # gas_value1 = struct.unpack('IIII', res)[1]
+                        # flame_value2 = struct.unpack('iiii', res)[2]
+                        # gas_value2 = struct.unpack('<IIII', res)[3]
+
+                        # flame_value1 = res[:4].decode('utf-8')
+                        # # flame_value1 = int(flame_value1)
+                        # gas_value1 = res[4:8].decode('utf-8')
+                        # # gas_value1 = int(gas_value1)
+                        # flame_value2 = res[8:12].decode('utf-8')
+                        # # flame_value2 = int(flame_value2)
+                        # gas_value2 = res[12:].decode('utf-8')
+                        # # gas_value2 = int(gas_value2)
+
+                        print(flame_value1,gas_value1,flame_value2,gas_value2)
+                        self.updateSensorValue.emit()
                     elif cmd == "GR":
                         self.detected.emit(int.from_bytes(res[2:6],"little"))
                     else:
@@ -85,8 +121,8 @@ class WindowClass(QMainWindow, from_class) :
         # setting variables
         self.sensor_timer_interval = 500
         self.RFID_timer_interval = 500
-        self.flame_criterion =50
-        self.gas_criterion = 50
+        self.flame_criterion =200
+        self.gas_criterion = 200
 
         # default flags
         self.fire_conn_flag = False
@@ -99,10 +135,6 @@ class WindowClass(QMainWindow, from_class) :
         self.prev_IS=0
         self.curr_IS=0
         self.try_count = 0
-        self.flame_value1 = 0
-        self.flame_value2 = 0
-        self.gas_value1 = 0
-        self.gas_value2 = 0
         self.sensor_loc = 0
         self.x_degree = 90
         self.y_degree = 90
@@ -173,13 +205,17 @@ class WindowClass(QMainWindow, from_class) :
 
     # test funciton
     def gas1test(self):
-        self.gas_value1 += 10
+        global gas_value1
+        gas_value1 += 10
     def gas2test(self):
-        self.gas_value2 += 10
+        global gas_value2
+        gas_value2 += 10
     def flame1test(self):
-        self.flame_value1 += 10
+        global flame_value1
+        flame_value1 += 10
     def flame2test(self):
-        self.flame_value2 += 10
+        global flame_value2
+        flame_value2 += 10
 
     # function ends program
     def endProgram(self):
@@ -207,10 +243,11 @@ class WindowClass(QMainWindow, from_class) :
         return
     # setText sensor Value
     def setValue(self):
-        self.gas_value1_label.setText(str(self.gas_value1))
-        self.gas_value2_label.setText(str(self.gas_value2))
-        self.flame_value1_label.setText(str(self.flame_value1))
-        self.flame_value2_label.setText(str(self.flame_value2))
+        global flame_value1, flame_value2, gas_value1, gas_value2
+        self.gas_value1_label.setText(str(gas_value1))
+        self.gas_value2_label.setText(str(gas_value2))
+        self.flame_value1_label.setText(str(flame_value1))
+        self.flame_value2_label.setText(str(flame_value2))
 
     # getSensor
     def getSensor(self):
@@ -227,15 +264,16 @@ class WindowClass(QMainWindow, from_class) :
     # updateSensorValue
     def updateSensorValue(self):
         print("updateSensorValue")
-        self.gas_value1_label.setText(str(self.gas_value1))
-        self.gas_value2_label.setText(str(self.gas_value2))
-        self.flame_value1_label.setText(str(self.flame_value1))
-        self.flame_value1_label.setText(str(self.flame_value1))
+        global flame_value1, flame_value2, gas_value1, gas_value2
+        self.gas_value1_label.setText(str(gas_value1))
+        self.gas_value2_label.setText(str(gas_value2))
+        self.flame_value1_label.setText(str(flame_value1))
+        self.flame_value1_label.setText(str(flame_value2))
 
-        self.flag_list[0]=(1 if (self.flame_value1 > self.flame_criterion) else self.flag_list[0])
-        self.flag_list[1]=(1 if (self.gas_value1 > self.gas_criterion) else self.flag_list[1])
-        self.flag_list[2]=(1 if (self.flame_value2 > self.flame_criterion) else self.flag_list[2])
-        self.flag_list[3]=(1 if (self.gas_value2 > self.gas_criterion) else self.flag_list[3])
+        self.flag_list[0]=(1 if (flame_value1 > self.flame_criterion) else self.flag_list[0])
+        self.flag_list[1]=(1 if (gas_value1 > self.gas_criterion) else self.flag_list[1])
+        self.flag_list[2]=(1 if (flame_value2 > self.flame_criterion) else self.flag_list[2])
+        self.flag_list[3]=(1 if (gas_value2 > self.gas_criterion) else self.flag_list[3])
         
         if self.sensor_loc == 0:
             if 1 in self.flag_list:
@@ -249,7 +287,7 @@ class WindowClass(QMainWindow, from_class) :
                 self.sensor_loc = 0
         gas_fire_flag = (self.flag_list[1]+self.flag_list[3] != 0, self.flag_list[0]+self.flag_list[2] != 0)
         print(gas_fire_flag)
-        print(self.flag_list.index(1)/2)
+        # print(self.flag_list.index(1)/2)
         if True in gas_fire_flag:
             if gas_fire_flag == (False, True):
                 self.prev_IS = self.curr_IS
