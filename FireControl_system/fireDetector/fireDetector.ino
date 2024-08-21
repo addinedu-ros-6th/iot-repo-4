@@ -47,6 +47,7 @@ void loop() {
       memset(send_buffer + 10, flameInfo2, 4);
       memset(send_buffer + 14, gasInfo2, 4);
       Serial.write(send_buffer, 18);
+      Serial.println();
     }
   }
 }
