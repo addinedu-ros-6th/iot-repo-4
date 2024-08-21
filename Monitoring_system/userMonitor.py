@@ -11,7 +11,7 @@ import struct
 # Receiver Thread
 class Receiver(QThread):
     detected = pyqtSignal(int)
-    updateSensorValue = pyqtSignal(int,int,int,int) #maybe (int,int,int,int)
+    updateSensorValue = pyqtSignal(int) #maybe (int,int,int,int)
     def __init__(self, conn, parent=None):
         super(Receiver, self).__init__(parent)
         self.is_running =False
@@ -225,7 +225,7 @@ class WindowClass(QMainWindow, from_class) :
         print("getRFID")
 
     # updateSensorValue
-    def updateSensorValue(self,data1,data2,data3,data4):
+    def updateSensorValue(self):
         print("updateSensorValue")
         self.gas_value1_label.setText(str(self.gas_value1))
         self.gas_value2_label.setText(str(self.gas_value2))
