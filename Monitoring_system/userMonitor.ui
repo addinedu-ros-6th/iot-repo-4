@@ -141,6 +141,9 @@
    </property>
   </widget>
   <widget class="QPushButton" name="gas_led_button">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>610</x>
@@ -150,10 +153,13 @@
     </rect>
    </property>
    <property name="text">
-    <string>Set Yellow</string>
+    <string/>
    </property>
   </widget>
   <widget class="QPushButton" name="flame_led_button">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>780</x>
@@ -163,7 +169,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Set Red</string>
+    <string/>
    </property>
   </widget>
   <widget class="QTableWidget" name="log_tableWidget">
@@ -324,6 +330,19 @@
    </property>
    <property name="text">
     <string>updatedValue</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="end_program_button">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>20</y>
+     <width>89</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>endProgram</string>
    </property>
   </widget>
  </widget>

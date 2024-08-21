@@ -11,7 +11,7 @@ import struct
 # Receiver Thread
 class Receiver(QThread):
     detected = pyqtSignal(int)
-    updateSensorValue = pyqtSignal(int) #maybe (int,int,int,int)
+    updateSensorValue = pyqtSignal(int,int,int,int) #maybe (int,int,int,int)
     def __init__(self, conn, parent=None):
         super(Receiver, self).__init__(parent)
         self.is_running =False
@@ -60,7 +60,7 @@ class Camera(QThread):
     def stop(self):
         self.running = False
 
-from_class = uic.loadUiType("/home/zeki/dev_ws/git_ws/iot-repo-4/Monitoring_system/tmp_fire_admin.ui")[0]
+from_class = uic.loadUiType("/home/zeki/dev_ws/git_ws/iot-repo-4/Monitoring_system/userMonitor.ui")[0]
 
 class WindowClass(QMainWindow, from_class) :
     def __init__(self):
@@ -157,12 +157,13 @@ class WindowClass(QMainWindow, from_class) :
 
         # wait signal from gui
         self.ventilation_button.clicked.connect(self.ventilation)
-        self.deactivate_button.clicked.connect(self.deactivateButton)
+        self.deactivate_button.clicked.connect(lambda : self.deactivateButton(2))
         self.camera_up_button.clicked.connect(self.cameraUpButton)
         self.camera_down_button.clicked.connect(self.cameraDownButton)
         self.camera_left_button.clicked.connect(self.cameraLeftButton)
         self.camera_right_button.clicked.connect(self.cameraRightButton)
-
+        self.safety_recv.detected.connect(self.deactivateButton)
+        self.end_program_button.clicked.connect(self.endProgram)
         # for testign ui
         self.gas1_test.clicked.connect(self.gas1test)
         self.gas2_test.clicked.connect(self.gas2test)
@@ -180,7 +181,10 @@ class WindowClass(QMainWindow, from_class) :
     def flame2test(self):
         self.flame_value2 += 10
 
-
+    # function ends program
+    def endProgram(self):
+        self.deactivateButton(2)
+        sys.exit()
     # function send to fireDetector Unit
     def send_fireD(self, command):
         # print("send")
@@ -221,12 +225,12 @@ class WindowClass(QMainWindow, from_class) :
         print("getRFID")
 
     # updateSensorValue
-    def updateSensorValue(self):
+    def updateSensorValue(self,data1,data2,data3,data4):
         print("updateSensorValue")
-        # self.gas_value1_label.setText(str(self.gas_value1))
-        # self.gas_value2_label.setText(str(self.gas_value2))
-        # self.flame_value1_label.setText(str(self.flame_value1))
-        # self.flame_value1_label.setText(str(self.flame_value1))
+        self.gas_value1_label.setText(str(self.gas_value1))
+        self.gas_value2_label.setText(str(self.gas_value2))
+        self.flame_value1_label.setText(str(self.flame_value1))
+        self.flame_value1_label.setText(str(self.flame_value1))
 
         self.flag_list[0]=(1 if (self.flame_value1 > self.flame_criterion) else self.flag_list[0])
         self.flag_list[1]=(1 if (self.gas_value1 > self.gas_criterion) else self.flag_list[1])
@@ -252,6 +256,7 @@ class WindowClass(QMainWindow, from_class) :
                 self.curr_IS = 1
                 self.flame_led_button.setStyleSheet("background-color: red;") #####################################
             elif gas_fire_flag == (True, False):
+                print("Im in gasfireflag TF")
                 self.prev_IS = self.curr_IS
                 self.curr_IS = 2
                 self.gas_led_button.setStyleSheet("background-color: yellow") #####################################
@@ -260,7 +265,7 @@ class WindowClass(QMainWindow, from_class) :
                 self.curr_IS = 3
                 self.flame_led_button.setStyleSheet("background-color: red") #####################################
                 self.gas_led_button.setStyleSheet("background-color: yellow") #####################################
-            
+            print(self.prev_IS,self.curr_IS)
             if self.prev_IS != self.curr_IS:
                 self.send_safeC(b'IS',self.curr_IS,self.sensor_loc) #self.curr_IS is int
                 print(self.flag_list)
@@ -306,26 +311,35 @@ class WindowClass(QMainWindow, from_class) :
         print("ventilation")
     
     # funciton of deactiveButton
-    def deactivateButton(self):
-        self.sensor_loc = 0
-        self.send_safeC(b"IS",0,self.sensor_loc)
-        self.gas_led_button.setStyleSheet("background-color: white")
-        self.flame_led_button.setStyleSheet("background-color: white")
+    def deactivateButton(self, data = 2):
+        print("deactive")
+        if data == 0:
+            QMessageBox.critical(self,"Error", "unknown error",QMessageBox.Ok)
+        elif data ==1:
+            QMessageBox.critical(self,"Error", "has occured, unauthorized",QMessageBox.Ok)
+        else:
+            self.sensor_loc = 0
+            self.prev_IS = 0
+            self.curr_IS = 0
+            self.send_safeC(b"IS",0,self.sensor_loc)
+            self.gas_led_button.setStyleSheet("background-color: white")
+            self.flame_led_button.setStyleSheet("background-color: white")
 
-        self.indoor_flag = False
-        self.RFID_timer.stop()
+            self.indoor_flag = False
+            self.RFID_timer.stop()
 
-        self.clickCamera()
-        #############33
+            self.clickCamera()
+            #############33
 
-        self.disable_cam_deactivate()
-        self.disable_ventilation_button()
-        self.ventilation_flag = False
+            self.disable_cam_deactivate()
+            self.disable_ventilation_button()
+            self.ventilation_flag = False
 
-        self.flag_list = [0,0,0,0]
-        self.cam_label.clear()
+            self.flag_list = [0,0,0,0]
+            self.cam_label.clear()
 
-        print("deactivateButton")
+            print("deactivateButton")
+            print(self.prev_IS,self.curr_IS)
 
     # function of cameraUpButton
     def cameraUpButton(self):
