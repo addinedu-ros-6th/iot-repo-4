@@ -321,9 +321,11 @@ class WindowClass(QMainWindow, from_class) :
     def deactivateButton(self, data = 2):
         print("deactive")
         if data == 0:
-            QMessageBox.critical(self,"Error", "unknown error",QMessageBox.Ok)
+            # QMessageBox.critical(self,"Error", "unknown error",QMessageBox.Ok)
+            pass
         elif data ==1:
-            QMessageBox.critical(self,"Error", "has occured, unauthorized",QMessageBox.Ok)
+            # QMessageBox.critical(self,"Error", "has occured, unauthorized",QMessageBox.Ok)
+            pass
         else:
             self.sensor_loc = 0
             self.prev_IS = 0
