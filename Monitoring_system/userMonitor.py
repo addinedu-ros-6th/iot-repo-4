@@ -491,7 +491,7 @@ class WindowClass(QMainWindow, from_class) :
             print("deactivateButton")
             print(self.prev_IS,self.curr_IS)
             self.sql_data_update(data) #############################################db update 하는곳
-            if self.DeactivateButton_counter >=5:
+            if self.DeactivateButton_counter >=3:
                 sys.exit()
 
     # function of cameraUpButton
