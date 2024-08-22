@@ -102,6 +102,7 @@ class WindowClass(QMainWindow, from_class) :
         self.camera_down_limit = 20
         self.camera_left_limit = 0
         self.camera_right_limit = 180
+        self.DeactivateButton_counter_reset_timer_interval = 5000
 
         # default flags
         self.fire_conn_flag = False
@@ -117,6 +118,7 @@ class WindowClass(QMainWindow, from_class) :
         self.sensor_loc = 0
         self.x_degree = 90
         self.y_degree = 90
+        self.DeactivateButton_counter = 0
 
         # connection of fireDetect_Unit
         while self.fire_conn_flag == False and self.try_count < 5:
@@ -130,7 +132,7 @@ class WindowClass(QMainWindow, from_class) :
         if self.fire_conn_flag == False and self.try_count>= 5:
             self.reply = QMessageBox.critical(self,"Error", "Failed to connect fireDetector Unit",QMessageBox.Ok)
             if self.reply:
-                sys.exit(0)
+                sys.exit()
         self.fire_recv = Receiver(self.fire_conn)
         self.fire_recv.start()
         self.try_count=0
@@ -149,7 +151,11 @@ class WindowClass(QMainWindow, from_class) :
         if self.safety_conn_flag:
             self.safety_recv = Receiver(self.safety_conn)
             self.safety_recv.start()
-
+        # reset RFID counter
+        self.DeactivateButton_counter_reset_timer = QTimer()
+        self.DeactivateButton_counter_reset_timer.setInterval(self.DeactivateButton_counter_reset_timer_interval)
+        self.DeactivateButton_counter_reset_timer.timeout.connect(self.resetDeactivateButtonCounter)
+        self.DeactivateButton_counter_reset_timer.start()
         # sensor_timer
         self.sensor_timer = QTimer()
         self.sensor_timer.setInterval(self.sensor_timer_interval)
@@ -200,6 +206,9 @@ class WindowClass(QMainWindow, from_class) :
             self.log_tableWidget.setItem(row, 7, QTableWidgetItem(str(value[7])))
             self.log_tableWidget.setItem(row, 8, QTableWidgetItem(str(value[8])))
             
+    # function resets DeactivateButton_counter
+    def resetDeactivateButtonCounter(self):
+        self.DeactivateButton_counter = 0
 
     # sql connect
     def initSQL(self):
@@ -458,6 +467,7 @@ class WindowClass(QMainWindow, from_class) :
             # QMessageBox.critical(self,"Error", "has occured, unauthorized",QMessageBox.Ok) ##################################################3
             pass
         else:
+            self.DeactivateButton_counter +=1
             self.sensor_loc = 0
             self.prev_IS = 0
             self.curr_IS = 0
@@ -481,6 +491,8 @@ class WindowClass(QMainWindow, from_class) :
             print("deactivateButton")
             print(self.prev_IS,self.curr_IS)
             self.sql_data_update(data) #############################################db update 하는곳
+            if self.DeactivateButton_counter >=5:
+                sys.exit()
 
     # function of cameraUpButton
     def cameraUpButton(self):
