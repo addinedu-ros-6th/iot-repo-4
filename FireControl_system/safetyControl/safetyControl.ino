@@ -22,12 +22,12 @@ Servo door_btm_servo;
 int indoor_stat = 0;
 int prev_pos = 0;
 
-int default_pos[3][2] = {{105, 30}, {60, 40}, {150, 40}}; //middle, right, left (front door pov)
-int degree_xy[2] = {0, 0};
+int default_pos[3][2] = {{115, 30}, {60, 40}, {150, 40}}; //middle, right, left (front door pov)
+int degree_xy[2] = {105, 30};
 
 const byte adminCards[2][4] = {
-  {0x63, 0xEB, 0x40, 0xFA},
-  {0xC3, 0x5C, 0xB7, 0x0F} //can add more admin cards
+  {0xC3, 0x5C, 0xB7, 0x0F}, //card
+  {0x63, 0xEB, 0x40, 0xFA} //tag
 };
 
 
@@ -36,11 +36,11 @@ const byte adminCards[2][4] = {
 void fan_activation(int activate) {
   if (activate == 1) {
     int pos = 0;
-    for (pos = 0; pos <= 180; pos += 5) {
+    for (pos = 0; pos <= 180; pos += 2) {
       fan_servo.write(pos); //start fan rotation (180 degrees)
       delay(15);
     }
-    for (pos = 180; pos >= 0; pos -= 5) {
+    for (pos = 180; pos >= 0; pos -= 2) {
       fan_servo.write(pos); //start fan rotation (90 degrees)
       delay(15);
     }
@@ -49,10 +49,22 @@ void fan_activation(int activate) {
     fan_servo.write(0); //stop
     // fan_servo.detach();
   }
-
+}
 // ----------------------------------------------------------------------------------------------------
 
+
+void printUID(byte *uid, byte length) {
+    for (byte i = 0; i < length; i++) {
+        if (uid[i] < 0x10) Serial.print("0");  // Add leading zero if necessary
+        Serial.print(uid[i], HEX);
+        if (i < length - 1) Serial.print(" "); // Add space between bytes
+    }
+    Serial.println();
 }
+
+// ---------------------------------------------------------------------------------------------------
+
+
 
 void deactivateAlarm() {
   digitalWrite(R_LED, LOW);
@@ -60,8 +72,8 @@ void deactivateAlarm() {
   noTone(BUZZER);
   door_top_servo.write(0);
   door_btm_servo.write(0);
-  cam_hor_servo.write(0);
-  cam_ver_servo.write(0);
+  cam_hor_servo.write(degree_xy[0]);
+  cam_ver_servo.write(degree_xy[1]);
   fan_activation(0);
 }
 
@@ -101,6 +113,15 @@ void setup() {
 
 
 void loop() {
+
+  // Serial.println(sizeof(adminCards) / sizeof(adminCards[0]));
+
+  // const byte tag[4] = {0x63, 0xEB, 0x40, 0xFA}; //tag
+
+
+  // if (memcmp(tag, adminCards[0], 4) == 0) { //compare tagged card info and registered admin card info
+  //   Serial.println("----");
+  // }
   int recv_size = 0;
   char recv_buffer[11]; // buffer to hold incoming data
 
@@ -132,6 +153,7 @@ void loop() {
         degree_xy[1] = default_pos[current_pos][1];
         cam_hor_servo.write(degree_xy[0]);
         cam_ver_servo.write(degree_xy[1]);
+        delay(10);
       }
 
       if (indoor_stat == 0) { //normal (default) state
@@ -157,7 +179,6 @@ void loop() {
         door_btm_servo.write(120);
         delay(15);
         fan_activation(1);
-        delay(15);
         // Serial.println("IS - Gas(2) SafetyControl");
 
       }
@@ -190,8 +211,9 @@ void loop() {
       cam_ver_servo.write(y_degree);
     }
     else if (strncmp(cmd, "VC", 2) == 0) { //ventilation control
-      byte vent_stat[4];
+      int vent_stat;
       memcpy(&vent_stat, recv_buffer + 2 , 4);
+      // Serial.println(vent_stat);
       fan_activation(vent_stat);
     }
     else if (strncmp(cmd, "GR", 2) == 0) {
@@ -200,43 +222,58 @@ void loop() {
       bool readCard = rc522.PICC_ReadCardSerial();
 
       if (newCard && readCard) {
-        for (int i = 0; i < sizeof(adminCards) / 4; i++) {
-          memset(send_buffer, 0x00, sizeof(send_buffer)); //clear the send_buffer
+
+        // const byte tag[4] = {0x63, 0xEB, 0x40, 0xFA}; //tag
+        // const byte card[4] = {0xC3, 0x5C, 0xB7, 0x0F}; // card
+        // if (memcmp(rc522.uid.uidByte, tag, 4) == 0)
+        //   {
+        //     Serial.println("tag");
+        //   }
+        //   else if (memcmp(rc522.uid.uidByte, card, 4) == 0)
+        //   {
+        //     Serial.println("card");
+        //   }
+        //   else {
+        //     Serial.println("none");
+        //   }
+
           
-          if (memcmp(rc522.uid.uidByte, adminCards[i], 4) == 0) { //compare tagged card info and registered admin card info
+          if (memcmp(rc522.uid.uidByte, adminCards[0], 4) == 0) { //compare tagged card info and registered admin card info
             deactivateAlarm(); //alarm deactivates once a registered admin card tagged
-            auth_state = 1;
+            auth_state = 2;
             // Serial.println("The fire alarm has been deactivated by the admin.");
-            return;
+          }
+          else if (memcmp(rc522.uid.uidByte, adminCards[1], 4) == 0) { //compare tagged card info and registered admin card info
+            deactivateAlarm(); //alarm deactivates once a registered admin card tagged
+            auth_state = 2;
+            // Serial.println("The fire alarm has been deactivated by the admin.");
           }
           else {
-            auth_state = 2; //unauthorized access
+            auth_state = 1; //unauthorized access
             // Serial.println("Unauthorized access. Please try again.");
           }
+          memset(send_buffer, 0x00, sizeof(send_buffer)); //clear the send_buffer
           memcpy(send_buffer, "GR", 2); // Add GR to the send buffer
           memcpy(send_buffer + 2, &auth_state, sizeof(auth_state)); // Add auth state to the send buffer
           send_buffer[6] = '\n';
-
           Serial.write(send_buffer, 7);     // Send response
-          Serial.println();
-        } 
-      }
+          // Serial.println();
+        }
       
       else {
-      memset(send_buffer, 0x00, sizeof(send_buffer)); //clear the send_buffer
-      memset(send_buffer, "GR", 2); // Add GR to the send buffer
-      // send_buffer[2] = 0; //0 unknown error
-      auth_state = 0;
-      memset(send_buffer + 2, &auth_state, sizeof(auth_state)); // Add auth state to the send buffer
-      send_buffer[6] = '\n';
+        memset(send_buffer, 0x00, sizeof(send_buffer)); //clear the send_buffer
+        memcpy(send_buffer, "GR", 2); // Add GR to the send buffer
+        // send_buffer[2] = 0; //0 unknown error
+        auth_state = 0;
 
-      Serial.write(send_buffer, 7);     // Send response
-      
-      Serial.println();
-      // Serial.println("Unknown/No card. Please try again.");
+        memcpy(send_buffer + 2, &auth_state, sizeof(auth_state)); // Add auth state to the send buffer
+        send_buffer[6] = '\n';
+        Serial.write(send_buffer, 7);     // Send response
+        // Serial.println();
+        // Serial.println("Unknown/No card. Please try again.");
       }
     }
-
-    // Serial.println(cmd); // Print to Serial Monitor
   }
 }
+
+
