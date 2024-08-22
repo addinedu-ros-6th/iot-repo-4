@@ -36,7 +36,6 @@ class Receiver(QThread):
                 if len(res) > 0:
                     print("loook at herererere")
                     print(res)
-                    print(int.from_bytes(res,"little"))
                     res = res[:-1] # origin res = res[:2]
                     cmd = res[:2].decode()
                     if cmd =="GS":
@@ -45,30 +44,6 @@ class Receiver(QThread):
                         gas_value1 = int.from_bytes(res[6:10],"little")
                         flame_value2 = int.from_bytes(res[10:14],"little")
                         gas_value2 = int.from_bytes(res[14:18],"little")
-
-                        # flame_value1= self.conn.readline().strip() # Testtttttttttingggggg
-                        # flame_value1 = int.from_bytes(flame_value1,"little")
-                        # gas_value1 = struct.unpack('<I', res[6:10])[0]
-                        # flame_value2 = struct.unpack('<I', res[10:14])[0]
-                        # gas_value2 = struct.unpack('<I', res[14:18])[0]
-                        # self.updateSensorValue.emit(flame_value1, gas_value1, flame_value2, gas_value2)
-                        # res = res[2:]
-                        # print(res)
-                        # flame_value1 = struct.unpack('>I', res[:4])[0]
-                        # gas_value1 = struct.unpack('IIII', res)[1]
-                        # flame_value2 = struct.unpack('iiii', res)[2]
-                        # gas_value2 = struct.unpack('<IIII', res)[3]
-
-                        # flame_value1 = res[:4].decode('utf-8')
-                        # # flame_value1 = int(flame_value1)
-                        # gas_value1 = res[4:8].decode('utf-8')
-                        # # gas_value1 = int(gas_value1)
-                        # flame_value2 = res[8:12].decode('utf-8')
-                        # # flame_value2 = int(flame_value2)
-                        # gas_value2 = res[12:].decode('utf-8')
-                        # # gas_value2 = int(gas_value2)
-
-                        print(flame_value1,gas_value1,flame_value2,gas_value2)
                         self.updateSensorValue.emit()
                     elif cmd == "GR":
                         self.detected.emit(int.from_bytes(res[2:6],"little"))
@@ -123,6 +98,10 @@ class WindowClass(QMainWindow, from_class) :
         self.RFID_timer_interval = 500
         self.flame_criterion = 300
         self.gas_criterion = 300
+        self.camera_up_limit = 50
+        self.camera_down_limit = 20
+        self.camera_left_limit = 0
+        self.camera_right_limit = 180
 
         # default flags
         self.fire_conn_flag = False
@@ -147,16 +126,15 @@ class WindowClass(QMainWindow, from_class) :
             except:
                 self.fire_conn_flag = False
                 self.try_count+=1
-                print(self.try_count)
+                time.sleep(1)
         if self.fire_conn_flag == False and self.try_count>= 5:
-            print("###############3endMessage################")
-            print("###############3endProgram################")
             self.reply = QMessageBox.critical(self,"Error", "Failed to connect fireDetector Unit",QMessageBox.Ok)
             if self.reply:
                 sys.exit(0)
         self.fire_recv = Receiver(self.fire_conn)
         self.fire_recv.start()
         self.try_count=0
+
         # connection of safetyControl_Unit
         while self.safety_conn_flag == False and self.try_count < 5:
             try:
@@ -166,7 +144,6 @@ class WindowClass(QMainWindow, from_class) :
                 self.safety_conn_flag = False
                 self.try_count+=1
         if self.safety_conn_flag == False and self.try_count>= 5:
-            print("###############3check error Message################")
             QMessageBox.critical(self,"Error", "Failed to connect safetyControl Unit",QMessageBox.Ok)
             self.safety_conn = object()
         if self.safety_conn_flag:
@@ -203,7 +180,7 @@ class WindowClass(QMainWindow, from_class) :
         self.flame2_test.clicked.connect(self.flame2test)
         self.updateValue.clicked.connect(self.updateSensorValue)
 
-    # test funciton
+    # test funciton ###################3
     def gas1test(self):
         global gas_value1
         gas_value1 += 10
@@ -254,8 +231,6 @@ class WindowClass(QMainWindow, from_class) :
         self.send_fireD(b"GS")
         print("getSensor")
 
-        self.setValue()
-
     # getRFID
     def getRFID(self):
         self.send_safeC(b"GR")
@@ -265,10 +240,11 @@ class WindowClass(QMainWindow, from_class) :
     def updateSensorValue(self):
         print("updateSensorValue")
         global flame_value1, flame_value2, gas_value1, gas_value2
-        self.gas_value1_label.setText(str(gas_value1))
-        self.gas_value2_label.setText(str(gas_value2))
-        self.flame_value1_label.setText(str(flame_value1))
-        self.flame_value1_label.setText(str(flame_value2))
+        # self.gas_value1_label.setText(str(gas_value1))
+        # self.gas_value2_label.setText(str(gas_value2))
+        # self.flame_value1_label.setText(str(flame_value1))
+        # self.flame_value2_label.setText(str(flame_value2))
+        self.setValue()
 
         self.flag_list[0]=(1 if (flame_value1 > self.flame_criterion) else self.flag_list[0])
         self.flag_list[1]=(1 if (gas_value1 > self.gas_criterion) else self.flag_list[1])
@@ -285,28 +261,25 @@ class WindowClass(QMainWindow, from_class) :
                     pass
             else:
                 self.sensor_loc = 0
-        gas_fire_flag = (self.flag_list[1]+self.flag_list[3] != 0, self.flag_list[0]+self.flag_list[2] != 0)
-        print(gas_fire_flag)
+        gas_fire_flag = (self.flag_list[1]+self.flag_list[3] != 0, 
+                         self.flag_list[0]+self.flag_list[2] != 0)
         # print(self.flag_list.index(1)/2)
         if True in gas_fire_flag:
             if gas_fire_flag == (False, True):
                 self.prev_IS = self.curr_IS
                 self.curr_IS = 1
-                self.flame_led_button.setStyleSheet("background-color: red;") #####################################
+                self.flame_led_button.setStyleSheet("background-color: red")
             elif gas_fire_flag == (True, False):
-                print("Im in gasfireflag TF")
                 self.prev_IS = self.curr_IS
                 self.curr_IS = 2
-                self.gas_led_button.setStyleSheet("background-color: yellow") #####################################
+                self.gas_led_button.setStyleSheet("background-color: yellow")
             elif gas_fire_flag == (True, True):
                 self.prev_IS = self.curr_IS
                 self.curr_IS = 3
-                self.flame_led_button.setStyleSheet("background-color: red") #####################################
-                self.gas_led_button.setStyleSheet("background-color: yellow") #####################################
-            print(self.prev_IS,self.curr_IS)
+                self.flame_led_button.setStyleSheet("background-color: red")
+                self.gas_led_button.setStyleSheet("background-color: yellow")
             if self.prev_IS != self.curr_IS:
                 self.send_safeC(b'IS',self.curr_IS,self.sensor_loc) #self.curr_IS is int
-                print(self.flag_list)
             if self.indoor_flag == False:
                 self.RFID_timer.start()
                 self.clickCamera() #displayCamera check indoor_flag and turn on if flag is true, off when false
@@ -349,12 +322,14 @@ class WindowClass(QMainWindow, from_class) :
         print("ventilation")
     
     # funciton of deactiveButton
-    def deactivateButton(self, data = 2):
+    def deactivateButton(self, data = 3):
         print("deactive")
         if data == 0:
-            QMessageBox.critical(self,"Error", "unknown error",QMessageBox.Ok)
+            # QMessageBox.critical(self,"Error", "unknown error",QMessageBox.Ok)#######################################################3
+            pass
         elif data ==1:
-            QMessageBox.critical(self,"Error", "has occured, unauthorized",QMessageBox.Ok)
+            # QMessageBox.critical(self,"Error", "has occured, unauthorized",QMessageBox.Ok) ##################################################3
+            pass
         else:
             self.sensor_loc = 0
             self.prev_IS = 0
@@ -381,25 +356,25 @@ class WindowClass(QMainWindow, from_class) :
 
     # function of cameraUpButton
     def cameraUpButton(self):
-        self.y_degree += 10
-        if self.y_degree >100:
-            self.y_degree = 100
+        self.y_degree -= 10
+        if self.y_degree <20:
+            self.y_degree = 20
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
         print("cameraUpButton")
     
     # function of cameraDownButton
     def cameraDownButton(self):
-        self.y_degree -= 10
-        if self.y_degree <0:
-            self.y_degree = 0
+        self.y_degree += 10
+        if self.y_degree >self.camera_up_limit:
+            self.y_degree = self.camera_up_limit
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
         print("cameraDownButton")
     
     # function of cameraLeftButton
     def cameraLeftButton(self):
-        self.x_degree += 10
-        if self.x_degree >100:
-            self.x_degree = 100
+        self.x_degree -= 10
+        if self.x_degree <self.camera_left_limit:
+            self.x_degree = self.camera_left_limit
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
@@ -407,9 +382,9 @@ class WindowClass(QMainWindow, from_class) :
     
     # function of cameraRightButton
     def cameraRightButton(self):
-        self.x_degree -= 10
-        if self.x_degree <0:
-            self.x_degree = 0
+        self.x_degree += 10
+        if self.x_degree >self.camera_right_limit:
+            self.x_degree = self.camera_right_limit
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
