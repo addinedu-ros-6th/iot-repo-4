@@ -121,7 +121,7 @@ class WindowClass(QMainWindow, from_class) :
         # setting variables
         self.sensor_timer_interval = 500
         self.RFID_timer_interval = 500
-        self.flame_criterion =300
+        self.flame_criterion = 300
         self.gas_criterion = 300
 
         # default flags
