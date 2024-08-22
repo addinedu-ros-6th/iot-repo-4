@@ -162,7 +162,7 @@ class WindowClass(QMainWindow, from_class) :
 
         # wait signal from gui
         self.ventilation_button.clicked.connect(self.ventilation)
-        self.deactivate_button.clicked.connect(lambda : self.deactivateButton(2))
+        self.deactivate_button.clicked.connect(lambda : self.deactivateButton(3))
         self.camera_up_button.clicked.connect(self.cameraUpButton)
         self.camera_down_button.clicked.connect(self.cameraDownButton)
         self.camera_left_button.clicked.connect(self.cameraLeftButton)
@@ -175,6 +175,131 @@ class WindowClass(QMainWindow, from_class) :
         self.flame1_test.clicked.connect(self.flame1test)
         self.flame2_test.clicked.connect(self.flame2test)
         self.updateValue.clicked.connect(self.updateSensorValue)
+        self.search_button.clicked.connect(self.print_database) # 임시버튼 혹은 아닌
+
+        #test database putout
+    def print_database(self):
+        self.cursor.execute("select * from fireIncident")  
+
+        self.log_tableWidget.setRowCount(0);  
+        for value in self.cursor.fetchall():
+            
+            row  = self.log_tableWidget.rowCount() 
+            self.log_tableWidget.insertRow(row)
+            self.log_tableWidget.setItem(row, 0, QTableWidgetItem(str(value[0])))
+            self.log_tableWidget.setItem(row, 1, QTableWidgetItem(str(value[1])))
+            self.log_tableWidget.setItem(row, 2, QTableWidgetItem(str(value[2])))
+            self.log_tableWidget.setItem(row, 3, QTableWidgetItem(str(value[3])))
+            self.log_tableWidget.setItem(row, 4, QTableWidgetItem(str(value[4])))
+            self.log_tableWidget.setItem(row, 5, QTableWidgetItem(str(value[5])))
+            self.log_tableWidget.setItem(row, 6, QTableWidgetItem(str(value[6])))
+            self.log_tableWidget.setItem(row, 7, QTableWidgetItem(str(value[7])))
+            self.log_tableWidget.setItem(row, 8, QTableWidgetItem(str(value[8])))
+            
+
+    # sql connect
+    def initSQL(self):
+        self.sql_conn = mysql.connector.connect(
+        host = "192.168.0.221",
+        port = 3306,
+        user = "lkm",
+        password = "1234",
+        database = "mainServer"
+        )
+
+        self.cursor = self.sql_conn.cursor(buffered=True)
+
+    #sql data insert
+    def sql_data_insert(self):
+        #occurr_time = datetime.now().strftime('%Y.%m.%d %H:%M:%S')
+        occurr_time = datetime.now()
+        occur_flame = 0
+        ocuur_gas=0
+        occur_flame_loc =0
+        occur_gas_loc=0
+        
+        if(self.curr_IS==1):
+            if(self.sensor_loc==1):
+                self.cursor.execute("""insert into fireIncident (flame_occurrence, flame_sensor, flame_value) values 
+                            (%s,%s,%s)""",(occurr_time, self.sensor_loc,flame_value1))
+                
+
+            elif(self.sensor_loc==2):
+                self.cursor.execute("""insert into fireIncident (flame_occurrence,gas_sensor,
+                        flame_value) values 
+                                (%s,%s,%s)""",(occurr_time,self.sensor_loc,flame_value2))
+        elif(self.curr_IS==2):       
+            if(self.sensor_loc==1):
+                self.cursor.execute("""insert into fireIncident (gas_occurrence,gas_sensor,gas_value) values 
+                            (%s,%s,%s)""",(occurr_time,self.sensor_loc,gas_value1))
+            elif(self.sensor_loc==2):
+                self.cursor.execute("""insert into fireIncident (gas_occurrence,gas_sensor,
+                        gas_value) values 
+                                (%s,%s,%s)""",(occurr_time,self.sensor_loc,gas_value2)) 
+        else:
+            if(flame_value1 > flame_value2):
+                occur_flame_value = flame_value1
+                occur_flame_loc =1
+            else:
+                occur_flame_value = flame_value2
+                occur_flame_loc =2   
+
+            if(gas_value1 > gas_value2):
+                occur_gas_value = gas_value1
+                occur_gas_loc=1
+            else:
+                occur_gas_value = gas_value2
+                occur_gas_loc=2   
+
+            self.cursor.execute("""insert into fireIncident (flame_occurrence,flame_sensor,flame_value,
+                    gas_occurrence, gas_sensor, gas_value) values 
+                (%s,%s,%s,%s,%s,%s)""",(occurr_time,occur_flame_loc,occur_flame_value, occurr_time,occur_gas_loc,occur_gas_value))
+            
+        self.sql_conn.commit()     
+    
+    #sql data update
+    def sql_data_update(self,data=3):
+        occurr_time = datetime.now()
+        occur_flame = 0
+        ocuur_gas=0
+        occur_flame_loc =0
+        occur_gas_loc=0
+        if(flame_value1 > flame_value2):
+            occur_flame_value = flame_value1
+            occur_flame_loc =1
+        else:
+            occur_flame_value = flame_value2
+            occur_flame_loc =2   
+        if(gas_value1 > gas_value2):
+            occur_gas_value = gas_value1
+            occur_gas_loc=1
+        else:
+            occur_gas_value = gas_value2
+            occur_gas_loc=2   
+        self.cursor.execute('''
+            SELECT id FROM fireIncident ORDER BY id DESC LIMIT 1
+            ''')
+            # 결과 가져오기
+        latest_id = self.cursor.fetchone()
+        latest_id = int(latest_id[0])
+
+        
+        if(self.prev_IS==1 and self.curr_IS==3):
+            self.cursor.execute("""update fireIncident SET gas_occurrence=%s, gas_sensor=%s, gas_value=%s WHERE id =%s
+                        """,(occurr_time,occur_gas_loc,occur_gas_value, latest_id))
+            
+        elif(self.prev_IS==2 and self.curr_IS==3):
+            self.cursor.execute("""update fireIncident SET gas_occurrence=%s, gas_sensor=%s, gas_value=%s WHERE id =%s
+                        """,(occurr_time, occur_flame_loc, occur_flame_value, latest_id))
+        elif(self.curr_IS==0):
+            
+            if(data==3):
+                self.cursor.execute("""update fireIncident SET termination=%s, termination_info=%s WHERE id =%s
+                            """,(occurr_time,"button clicked" ,latest_id))
+            else:
+                self.cursor.execute("""update fireIncident SET termination=%s, termination_info=%s WHERE id =%s
+                            """,(occurr_time,"RFID TAG" ,latest_id))
+        self.sql_conn.commit()     
 
     # test funciton ###################3
     def gas1test(self):
@@ -276,10 +401,12 @@ class WindowClass(QMainWindow, from_class) :
                 self.gas_led_button.setStyleSheet("background-color: yellow")
             if self.prev_IS != self.curr_IS:
                 self.send_safeC(b'IS',self.curr_IS,self.sensor_loc) #self.curr_IS is int
+                self.sql_data_update() ##############################################db 업데이트 하는 곳
             if self.indoor_flag == False:
                 self.RFID_timer.start()
                 self.clickCamera() #displayCamera check indoor_flag and turn on if flag is true, off when false
                                         # or separate to activeCamera() deactiveCamera()
+                self.sql_data_insert() #상황 발생 시 db 데이터 삽입 *********수정가능*******
             self.indoor_flag = True
             self.enable_cam_deactivate()
             if 1 in [self.flag_list[0],self.flag_list[2]]:
@@ -349,6 +476,7 @@ class WindowClass(QMainWindow, from_class) :
 
             print("deactivateButton")
             print(self.prev_IS,self.curr_IS)
+            self.sql_data_update(data) #############################################db update 하는곳
 
     # function of cameraUpButton
     def cameraUpButton(self):
