@@ -352,25 +352,25 @@ class WindowClass(QMainWindow, from_class) :
 
     # function of cameraUpButton
     def cameraUpButton(self):
-        self.y_degree += 10
-        if self.y_degree >100:
-            self.y_degree = 100
+        self.y_degree -= 10
+        if self.y_degree <20:
+            self.y_degree = 20
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
         print("cameraUpButton")
     
     # function of cameraDownButton
     def cameraDownButton(self):
-        self.y_degree -= 10
-        if self.y_degree <0:
-            self.y_degree = 0
+        self.y_degree += 10
+        if self.y_degree >50:
+            self.y_degree = 50
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
         print("cameraDownButton")
     
     # function of cameraLeftButton
     def cameraLeftButton(self):
-        self.x_degree += 10
-        if self.x_degree >100:
-            self.x_degree = 100
+        self.x_degree -= 10
+        if self.x_degree <0:
+            self.x_degree = 0
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
@@ -378,9 +378,9 @@ class WindowClass(QMainWindow, from_class) :
     
     # function of cameraRightButton
     def cameraRightButton(self):
-        self.x_degree -= 10
-        if self.x_degree <0:
-            self.x_degree = 0
+        self.x_degree += 10
+        if self.x_degree >180:
+            self.x_degree = 180
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
