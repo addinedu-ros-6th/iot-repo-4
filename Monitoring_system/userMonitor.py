@@ -98,6 +98,10 @@ class WindowClass(QMainWindow, from_class) :
         self.RFID_timer_interval = 500
         self.flame_criterion =300
         self.gas_criterion = 300
+        self.camera_up_limit = 50
+        self.camera_down_limit = 20
+        self.camera_left_limit = 0
+        self.camera_right_limit = 180
 
         # default flags
         self.fire_conn_flag = False
@@ -480,25 +484,25 @@ class WindowClass(QMainWindow, from_class) :
 
     # function of cameraUpButton
     def cameraUpButton(self):
-        self.y_degree += 10
-        if self.y_degree >100:
-            self.y_degree = 100
+        self.y_degree -= 10
+        if self.y_degree <20:
+            self.y_degree = 20
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
         print("cameraUpButton")
     
     # function of cameraDownButton
     def cameraDownButton(self):
-        self.y_degree -= 10
-        if self.y_degree <0:
-            self.y_degree = 0
+        self.y_degree += 10
+        if self.y_degree >self.camera_up_limit:
+            self.y_degree = self.camera_up_limit
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
         print("cameraDownButton")
     
     # function of cameraLeftButton
     def cameraLeftButton(self):
-        self.x_degree += 10
-        if self.x_degree >100:
-            self.x_degree = 100
+        self.x_degree -= 10
+        if self.x_degree <self.camera_left_limit:
+            self.x_degree = self.camera_left_limit
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
@@ -506,9 +510,9 @@ class WindowClass(QMainWindow, from_class) :
     
     # function of cameraRightButton
     def cameraRightButton(self):
-        self.x_degree -= 10
-        if self.x_degree <0:
-            self.x_degree = 0
+        self.x_degree += 10
+        if self.x_degree >self.camera_right_limit:
+            self.x_degree = self.camera_right_limit
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
