@@ -100,8 +100,8 @@ class WindowClass(QMainWindow, from_class) :
         self.gas_criterion = 300
         self.camera_up_limit = 50
         self.camera_down_limit = 20
-        self.camera_left_limit = 0
-        self.camera_right_limit = 180
+        self.camera_left_limit = 180
+        self.camera_right_limit = 0
         self.DeactivateButton_counter_reset_timer_interval = 5000
 
         # default flags
@@ -116,8 +116,8 @@ class WindowClass(QMainWindow, from_class) :
         self.curr_IS=0
         self.try_count = 0
         self.sensor_loc = 0
-        self.x_degree = 90
-        self.y_degree = 90
+        self.x_degree = 105
+        self.y_degree = 30
         self.DeactivateButton_counter = 0
 
         # connection of fireDetect_Unit
@@ -512,8 +512,8 @@ class WindowClass(QMainWindow, from_class) :
     
     # function of cameraLeftButton
     def cameraLeftButton(self):
-        self.x_degree -= 10
-        if self.x_degree <self.camera_left_limit:
+        self.x_degree += 10
+        if self.x_degree >self.camera_left_limit:
             self.x_degree = self.camera_left_limit
         if self.x_degree == 10:
             self.x_degree = 11
@@ -522,8 +522,8 @@ class WindowClass(QMainWindow, from_class) :
     
     # function of cameraRightButton
     def cameraRightButton(self):
-        self.x_degree += 10
-        if self.x_degree >self.camera_right_limit:
+        self.x_degree -= 10
+        if self.x_degree <self.camera_right_limit:
             self.x_degree = self.camera_right_limit
         if self.x_degree == 10:
             self.x_degree = 11
