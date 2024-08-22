@@ -177,10 +177,55 @@
     <rect>
      <x>80</x>
      <y>560</y>
-     <width>401</width>
+     <width>421</width>
      <height>192</height>
     </rect>
    </property>
+   <column>
+    <property name="text">
+     <string>id</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>flame_sensor</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>flame</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>flame_value</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>gas_occurence</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>gas_sensor</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>gas_value</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>termination_info</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>termination_info</string>
+    </property>
+   </column>
   </widget>
   <widget class="QLabel" name="label_4">
    <property name="geometry">
@@ -343,6 +388,19 @@
    </property>
    <property name="text">
     <string>endProgram</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="search_button">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>680</y>
+     <width>71</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>search</string>
    </property>
   </widget>
  </widget>
