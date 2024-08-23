@@ -22,7 +22,7 @@ Servo door_btm_servo;
 int indoor_stat = 0;
 int prev_pos = 0;
 
-int default_pos[3][2] = {{115, 30}, {60, 40}, {150, 40}}; //middle, right, left (front door pov)
+int default_pos[3][2] = {{115, 30}, {60, 30}, {150, 30}}; //middle, right, left (front door pov)
 int degree_xy[2] = {105, 30};
 
 const byte adminCards[2][4] = {
@@ -34,22 +34,38 @@ const byte adminCards[2][4] = {
 // ----------------------------------------------------------------------------------------------------
 
 void fan_activation(int activate) {
-  if (activate == 1) {
+  static int prev_activate = 0;
+  static bool fan_active = false; // To keep track of whether the fan is running
+
+  if (activate == 1 || fan_active) {
+    prev_activate = 1;
+    fan_active = true; // Mark the fan as active
     int pos = 0;
     for (pos = 0; pos <= 180; pos += 2) {
-      fan_servo.write(pos); //start fan rotation (180 degrees)
+      fan_servo.write(pos); // start fan rotation (180 degrees)
       delay(15);
     }
     for (pos = 180; pos >= 0; pos -= 2) {
-      fan_servo.write(pos); //start fan rotation (90 degrees)
+      fan_servo.write(pos); // start fan rotation (90 degrees)
+      delay(15);
+    }
+    for (pos = 0; pos <= 180; pos += 2) {
+      fan_servo.write(pos); // start fan rotation (180 degrees)
+      delay(15);
+    }
+    for (pos = 180; pos >= 0; pos -= 2) {
+      fan_servo.write(pos); // start fan rotation (90 degrees)
       delay(15);
     }
   }
   else {
-    fan_servo.write(0); //stop
+    prev_activate = 0;
+    fan_active = false; // Mark the fan as inactive
+    fan_servo.write(0); // stop the fan
     // fan_servo.detach();
   }
 }
+
 // ----------------------------------------------------------------------------------------------------
 
 
@@ -74,6 +90,7 @@ void deactivateAlarm() {
   door_btm_servo.write(0);
   cam_hor_servo.write(degree_xy[0]);
   cam_ver_servo.write(degree_xy[1]);
+  fan_servo.write(0);
   fan_activation(0);
 }
 
@@ -197,6 +214,7 @@ void loop() {
 
     }
     else if (strncmp(cmd, "CC", 2) == 0) { //camera control
+    //add frombyte function tmr
       byte x_bytes[4];
       byte y_bytes[4];
       int x_degree;
@@ -223,21 +241,6 @@ void loop() {
 
       if (newCard && readCard) {
 
-        // const byte tag[4] = {0x63, 0xEB, 0x40, 0xFA}; //tag
-        // const byte card[4] = {0xC3, 0x5C, 0xB7, 0x0F}; // card
-        // if (memcmp(rc522.uid.uidByte, tag, 4) == 0)
-        //   {
-        //     Serial.println("tag");
-        //   }
-        //   else if (memcmp(rc522.uid.uidByte, card, 4) == 0)
-        //   {
-        //     Serial.println("card");
-        //   }
-        //   else {
-        //     Serial.println("none");
-        //   }
-
-          
           if (memcmp(rc522.uid.uidByte, adminCards[0], 4) == 0) { //compare tagged card info and registered admin card info
             deactivateAlarm(); //alarm deactivates once a registered admin card tagged
             auth_state = 2;
@@ -257,7 +260,6 @@ void loop() {
           memcpy(send_buffer + 2, &auth_state, sizeof(auth_state)); // Add auth state to the send buffer
           send_buffer[6] = '\n';
           Serial.write(send_buffer, 7);     // Send response
-          // Serial.println();
         }
       
       else {
@@ -269,11 +271,9 @@ void loop() {
         memcpy(send_buffer + 2, &auth_state, sizeof(auth_state)); // Add auth state to the send buffer
         send_buffer[6] = '\n';
         Serial.write(send_buffer, 7);     // Send response
-        // Serial.println();
         // Serial.println("Unknown/No card. Please try again.");
       }
     }
   }
 }
-
 
