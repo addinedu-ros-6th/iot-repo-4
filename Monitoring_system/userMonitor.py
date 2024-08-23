@@ -124,8 +124,15 @@ class WindowClass(QMainWindow, from_class) :
         # setting variables
         self.sensor_timer_interval = 500
         self.RFID_timer_interval = 500
-        self.flame_criterion =200
-        self.gas_criterion = 200
+
+        self.flame_criterion = 300
+        self.gas_criterion = 300
+        self.camera_up_limit = 50
+        self.camera_down_limit = 20
+        self.camera_left_limit = 180
+        self.camera_right_limit = 0
+        self.DeactivateButton_counter_reset_timer_interval = 5000
+
 
         # default flags
         self.fire_conn_flag = False
@@ -139,8 +146,9 @@ class WindowClass(QMainWindow, from_class) :
         self.curr_IS=0
         self.try_count = 0
         self.sensor_loc = 0
-        self.x_degree = 90
-        self.y_degree = 90
+        self.x_degree = 105
+        self.y_degree = 30
+        self.DeactivateButton_counter = 0
 
         # connection of fireDetect_Unit
         while self.fire_conn_flag == False and self.try_count < 5:
@@ -156,7 +164,7 @@ class WindowClass(QMainWindow, from_class) :
             print("###############3endProgram################")
             self.reply = QMessageBox.critical(self,"Error", "Failed to connect fireDetector Unit",QMessageBox.Ok)
             if self.reply:
-                sys.exit(0)
+                sys.exit()
         self.fire_recv = Receiver(self.fire_conn)
         self.fire_recv.start()
         self.try_count=0
@@ -175,7 +183,11 @@ class WindowClass(QMainWindow, from_class) :
         if self.safety_conn_flag:
             self.safety_recv = Receiver(self.safety_conn)
             self.safety_recv.start()
-
+        # reset RFID counter
+        self.DeactivateButton_counter_reset_timer = QTimer()
+        self.DeactivateButton_counter_reset_timer.setInterval(self.DeactivateButton_counter_reset_timer_interval)
+        self.DeactivateButton_counter_reset_timer.timeout.connect(self.resetDeactivateButtonCounter)
+        self.DeactivateButton_counter_reset_timer.start()
         # sensor_timer
         self.sensor_timer = QTimer()
         self.sensor_timer.setInterval(self.sensor_timer_interval)
@@ -278,6 +290,9 @@ class WindowClass(QMainWindow, from_class) :
             self.log_tableWidget_2.setItem(row, 7, QTableWidgetItem(str(value[7])))
             self.log_tableWidget_2.setItem(row, 8, QTableWidgetItem(str(value[8])))        
             
+    # function resets DeactivateButton_counter
+    def resetDeactivateButtonCounter(self):
+        self.DeactivateButton_counter = 0
 
     # sql connect
     def initSQL(self):
@@ -548,6 +563,7 @@ class WindowClass(QMainWindow, from_class) :
             QMessageBox.critical(self,"Error", "has occured, unauthorized",QMessageBox.Ok)
 
         else:
+            self.DeactivateButton_counter +=1
             self.sensor_loc = 0
             self.prev_IS = 0
             self.curr_IS = 0
@@ -572,6 +588,8 @@ class WindowClass(QMainWindow, from_class) :
             print(self.prev_IS,self.curr_IS)
             
             self.sql_data_update(data) #############################################db update 하는곳
+            if self.DeactivateButton_counter >=3:
+                sys.exit()
 
     # function of cameraUpButton
     def cameraUpButton(self):
@@ -592,8 +610,10 @@ class WindowClass(QMainWindow, from_class) :
     # function of cameraLeftButton
     def cameraLeftButton(self):
         self.x_degree += 10
-        if self.x_degree >100:
-            self.x_degree = 100
+
+        if self.x_degree >self.camera_left_limit:
+            self.x_degree = self.camera_left_limit
+
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
@@ -602,8 +622,10 @@ class WindowClass(QMainWindow, from_class) :
     # function of cameraRightButton
     def cameraRightButton(self):
         self.x_degree -= 10
-        if self.x_degree <0:
-            self.x_degree = 0
+
+        if self.x_degree <self.camera_right_limit:
+            self.x_degree = self.camera_right_limit
+
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
