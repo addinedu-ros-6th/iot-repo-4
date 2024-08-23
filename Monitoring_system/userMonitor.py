@@ -527,7 +527,6 @@ class WindowClass(QMainWindow, from_class) :
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
-        print(self.x_degree)
         print("cameraLeftButton")
     
     # function of cameraRightButton
@@ -538,7 +537,6 @@ class WindowClass(QMainWindow, from_class) :
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
-        print(self.x_degree)
         print("cameraRightButton")
 
     # set Camera to Gui
