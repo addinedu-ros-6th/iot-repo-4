@@ -91,7 +91,6 @@ void deactivateAlarm() {
   cam_hor_servo.write(degree_xy[0]);
   cam_ver_servo.write(degree_xy[1]);
   fan_servo.write(0);
-  fan_activation(0);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -131,14 +130,6 @@ void setup() {
 
 void loop() {
 
-  // Serial.println(sizeof(adminCards) / sizeof(adminCards[0]));
-
-  // const byte tag[4] = {0x63, 0xEB, 0x40, 0xFA}; //tag
-
-
-  // if (memcmp(tag, adminCards[0], 4) == 0) { //compare tagged card info and registered admin card info
-  //   Serial.println("----");
-  // }
   int recv_size = 0;
   char recv_buffer[11]; // buffer to hold incoming data
 
@@ -214,19 +205,24 @@ void loop() {
 
     }
     else if (strncmp(cmd, "CC", 2) == 0) { //camera control
-    //add frombyte function tmr
-      byte x_bytes[4];
-      byte y_bytes[4];
-      int x_degree;
-      int y_degree;
-      memcpy(&x_bytes, recv_buffer + 2, 4);
-      memcpy(&y_bytes, recv_buffer + 6, 4);
 
-      memcpy(&x_degree, x_bytes, 4);
-      memcpy(&y_degree, y_bytes, 4);
+      int x_degree = 0;
+      int y_degree = 0;
+
+      Convert bytes to integers correctly considering the endianess
+      x_degree = (int)recv_buffer[2] |
+                ((int)recv_buffer[3] << 8) |
+                ((int)recv_buffer[4] << 16) |
+                ((int)recv_buffer[5] << 24);
+
+      y_degree = (int)recv_buffer[6] |
+                ((int)recv_buffer[7] << 8) |
+                ((int)recv_buffer[8] << 16) |
+                ((int)recv_buffer[9] << 24);
 
       cam_hor_servo.write(x_degree);
       cam_ver_servo.write(y_degree);
+
     }
     else if (strncmp(cmd, "VC", 2) == 0) { //ventilation control
       int vent_stat;
@@ -247,7 +243,7 @@ void loop() {
             // Serial.println("The fire alarm has been deactivated by the admin.");
           }
           else if (memcmp(rc522.uid.uidByte, adminCards[1], 4) == 0) { //compare tagged card info and registered admin card info
-            deactivateAlarm(); //alarm deactivates once a registered admin card tagged
+            deactivateAlarm(); 
             auth_state = 2;
             // Serial.println("The fire alarm has been deactivated by the admin.");
           }
