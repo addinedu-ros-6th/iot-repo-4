@@ -5,9 +5,10 @@ from PyQt5 import uic
 import cv2, imutils
 from PyQt5.QtCore import *
 import time
-import datetime
+from datetime import datetime
 import serial 
 import struct
+import mysql.connector
 
 flame_value1 = 0
 flame_value2 = 0
@@ -71,12 +72,14 @@ class Camera(QThread):
     def stop(self):
         self.running = False
 
-from_class = uic.loadUiType("/home/zeki/dev_ws/git_ws/iot-repo-4/Monitoring_system/userMonitor.ui")[0]
+                            #change directory
+from_class = uic.loadUiType("/home/ksm/ws/pyqt/group project/fire alarm project/test set/userMonitor.ui")[0]
 
 class WindowClass(QMainWindow, from_class) :
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.initSQL()
         
         self.setWindowTitle("Hello, Qt!")
         # codes for cam
@@ -96,8 +99,8 @@ class WindowClass(QMainWindow, from_class) :
         # setting variables
         self.sensor_timer_interval = 500
         self.RFID_timer_interval = 500
-        self.flame_criterion = 300
-        self.gas_criterion = 300
+        self.flame_criterion = 350
+        self.gas_criterion = 350
         self.camera_up_limit = 50
         self.camera_down_limit = 20
         self.camera_left_limit = 180
@@ -389,8 +392,10 @@ class WindowClass(QMainWindow, from_class) :
             if 1 in self.flag_list:
                 if 1 in self.flag_list[0:2]:
                     self.sensor_loc = 1
+                    self.x_degree = 60
                 elif 1 in self.flag_list[2:]:
                     self.sensor_loc = 2
+                    self.x_degree = 150
                 else:
                     pass
             else:
@@ -426,6 +431,8 @@ class WindowClass(QMainWindow, from_class) :
                 self.enable_ventilation_button()
             else:
                 self.disable_ventilation_button()
+            print("flag_list")
+            print(self.flag_list)
 
     # disable cam button and deactivate button  
     def disable_cam_deactivate(self):
@@ -471,6 +478,8 @@ class WindowClass(QMainWindow, from_class) :
             self.sensor_loc = 0
             self.prev_IS = 0
             self.curr_IS = 0
+            self.x_degree = 105
+            self.y_degree = 30
             self.send_safeC(b"IS",0,self.sensor_loc)
             self.gas_led_button.setStyleSheet("background-color: white")
             self.flame_led_button.setStyleSheet("background-color: white")
@@ -518,6 +527,7 @@ class WindowClass(QMainWindow, from_class) :
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
+        print(self.x_degree)
         print("cameraLeftButton")
     
     # function of cameraRightButton
@@ -528,6 +538,7 @@ class WindowClass(QMainWindow, from_class) :
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
+        print(self.x_degree)
         print("cameraRightButton")
 
     # set Camera to Gui
