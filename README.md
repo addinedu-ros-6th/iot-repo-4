@@ -35,7 +35,9 @@
 ### Scenario (Sequence) Diagram
 - contents / diagram
 
-### Serial Communication Protocol
+## Serial Communication Protocol
+- diagram
+- explanation
 
 ## Hardware / Wiring
 - photo
