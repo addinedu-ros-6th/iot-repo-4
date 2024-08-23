@@ -5,12 +5,8 @@ from PyQt5 import uic
 import cv2, imutils
 from PyQt5.QtCore import *
 import time
-<<<<<<< HEAD
 import datetime
 from datetime import datetime 
-=======
-from datetime import datetime
->>>>>>> a07ddd9f52210d36591ab6f5e72acf2d4a6427dc
 import serial 
 import struct
 import mysql.connector
@@ -102,22 +98,16 @@ class Camera(QThread):
     def stop(self):
         self.running = False
 
-<<<<<<< HEAD
-from_class = uic.loadUiType("/home/yhseo/dev_ws/git_ws/iot-repo-4/Monitoring_system/userMonitor.ui")[0]
-=======
                             #change directory
-from_class = uic.loadUiType("/home/ksm/ws/pyqt/group project/fire alarm project/test set/userMonitor.ui")[0]
->>>>>>> a07ddd9f52210d36591ab6f5e72acf2d4a6427dc
+from_class = uic.loadUiType("/home/zeki/dev_ws/git_ws/iot-repo-4/Monitoring_system/userMonitor.ui")[0]
+
 
 class WindowClass(QMainWindow, from_class) :
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         self.initSQL()
-<<<<<<< HEAD
-=======
-        
->>>>>>> a07ddd9f52210d36591ab6f5e72acf2d4a6427dc
+
         self.setWindowTitle("Hello, Qt!")
         # codes for cam
         self.isCameraOn = False
@@ -138,14 +128,8 @@ class WindowClass(QMainWindow, from_class) :
         # setting variables
         self.sensor_timer_interval = 500
         self.RFID_timer_interval = 500
-<<<<<<< HEAD
-
-        self.flame_criterion = 300
-        self.gas_criterion = 300
-=======
         self.flame_criterion = 350
         self.gas_criterion = 350
->>>>>>> a07ddd9f52210d36591ab6f5e72acf2d4a6427dc
         self.camera_up_limit = 50
         self.camera_down_limit = 20
         self.camera_left_limit = 180
@@ -745,7 +729,7 @@ class WindowClass(QMainWindow, from_class) :
         #     self.mp4Stop()
         self.camera.running = True
         self.camera.start()
-        self.video = cv2.VideoCapture(-1)
+        self.video = cv2.VideoCapture(2)
     
     def cameraStop(self):
         self.camera.running = False
