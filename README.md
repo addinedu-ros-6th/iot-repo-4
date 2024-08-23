@@ -1,7 +1,7 @@
 # IoT Project Team 4 repository: Fire Safe Monitoring System
 
 ## Introduction
-
+- contents
 
 ## Skillset
 
@@ -22,21 +22,36 @@
 |영문이름 |맡은일|
 
 ## User Requirement Analysis
-
+- contents
+  
 ## System Architecture Design
 
 ### Status Diagram
+- contents / diagram
+
 ### System Design
+- contents / diagram
+
 ### Scenario (Sequence) Diagram
+- contents / diagram
+
 ### Serial Communication Protocol
 
-## Hardware Design
-## GUI Design
-## DB Schema
+## Hardware / Wiring
+- photo
 
+## GUI Design
+- contents / diagram
+
+## DB Schema
+- contents / diagram
 
 ## Demo Video
+[![Watch the video](https://github.com/user-attachments/assets/64dde2a7-0494-4401-9b6e-c69f5848bcb0)](https://drive.google.com/file/d/1hy1FeOyQ_F7rgvRvqLCTZ0Ngx3BC0v6t/view?usp=drive_link)
+- After gas and flame sensor detection, end the incident by tagging a registered (authorized) card on the RFID module
 
 ## Unit Test
+- contents / diagram
 
 ## Conclusion
+- contents
