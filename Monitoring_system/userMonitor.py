@@ -120,6 +120,7 @@ class WindowClass(QMainWindow, from_class) :
 
         #large db screen hide
         self.groupBox.hide()
+        self.groupBox_2.hide()
 
         # setting variables
         self.sensor_timer_interval = 500
@@ -183,6 +184,14 @@ class WindowClass(QMainWindow, from_class) :
         if self.safety_conn_flag:
             self.safety_recv = Receiver(self.safety_conn)
             self.safety_recv.start()
+
+
+        #test timer
+        #self.test_timer = QTimer()
+        #self.test_timer.setInterval(self.sensor_timer_interval)
+        #self.test_timer.timeout.connect(self.sql_total_sensor_insert)
+        #self.test_timer.start()
+
         # reset RFID counter
         self.DeactivateButton_counter_reset_timer = QTimer()
         self.DeactivateButton_counter_reset_timer.setInterval(self.DeactivateButton_counter_reset_timer_interval)
@@ -243,8 +252,15 @@ class WindowClass(QMainWindow, from_class) :
     def exit_database_enlarge(self):
         self.groupBox.hide()
 
+    def detail_sensors_show(self):
+        self.groupBox_2.show()
+
+    
+    def exit_sensors(self):
+        self.groupBox_2.hide()    
+
     def show_database_enlarge(self):
-        self.groupBox.show()
+        self.groupBox.show()    
 
     def show_notnull_data(self):
         self.cursor.execute("""SELECT *FROM fireIncident 
@@ -305,6 +321,35 @@ class WindowClass(QMainWindow, from_class) :
         )
 
         self.cursor = self.sql_conn.cursor(buffered=True)
+
+    #test
+    def sql_total_sensor_insert(self):
+       if(self.indoor_flag ==True):
+            self.cursor.execute('''
+                SELECT id FROM fireIncident ORDER BY id DESC LIMIT 1
+                ''')
+                # 결과 가져오기
+            pri_id = self.cursor.fetchone()
+            pri_id = int(pri_id[0])
+            flame_value1, flame_value2, gas_value1, gas_value2 = 1,2,3,4
+            self.cursor.execute("""insert into sensors (occurid, flameValue1, gasValue1, flameValue2, gasValue2) values 
+                                (%s,%s,%s,%s,%s)""",(pri_id, flame_value1, flame_value2, gas_value1, gas_value2))
+            
+            self.sql_conn.commit()
+    
+            self.cursor.execute("SELECT * FROM sensors where occurid=%s", (pri_id,))
+    
+            self.log_tableWidget_3.setRowCount(0);  
+            for value in self.cursor.fetchall():
+                
+                row  = self.log_tableWidget_3.rowCount() 
+                self.log_tableWidget_3.insertRow(row)
+                self.log_tableWidget_3.setItem(row, 0, QTableWidgetItem(str(value[0])))
+                self.log_tableWidget_3.setItem(row, 1, QTableWidgetItem(str(value[1])))
+                self.log_tableWidget_3.setItem(row, 2, QTableWidgetItem(str(value[2])))
+                self.log_tableWidget_3.setItem(row, 3, QTableWidgetItem(str(value[3])))
+                self.log_tableWidget_3.setItem(row, 4, QTableWidgetItem(str(value[4])))
+                self.log_tableWidget_3.setItem(row, 5, QTableWidgetItem(str(value[5])))
 
     #sql data insert
     def sql_data_insert(self):
