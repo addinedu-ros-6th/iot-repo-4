@@ -6,8 +6,10 @@ import cv2, imutils
 from PyQt5.QtCore import *
 import time
 import datetime
+from datetime import datetime 
 import serial 
 import struct
+import mysql.connector
 
 flame_value1 = 0
 flame_value2 = 0
@@ -36,6 +38,7 @@ class Receiver(QThread):
                 if len(res) > 0:
                     print("loook at herererere")
                     print(res)
+                    print(int.from_bytes(res,"little"))
                     res = res[:-1] # origin res = res[:2]
                     cmd = res[:2].decode()
                     if cmd =="GS":
@@ -44,6 +47,30 @@ class Receiver(QThread):
                         gas_value1 = int.from_bytes(res[6:10],"little")
                         flame_value2 = int.from_bytes(res[10:14],"little")
                         gas_value2 = int.from_bytes(res[14:18],"little")
+
+                        # flame_value1= self.conn.readline().strip() # Testtttttttttingggggg
+                        # flame_value1 = int.from_bytes(flame_value1,"little")
+                        # gas_value1 = struct.unpack('<I', res[6:10])[0]
+                        # flame_value2 = struct.unpack('<I', res[10:14])[0]
+                        # gas_value2 = struct.unpack('<I', res[14:18])[0]
+                        # self.updateSensorValue.emit(flame_value1, gas_value1, flame_value2, gas_value2)
+                        # res = res[2:]
+                        # print(res)
+                        # flame_value1 = struct.unpack('>I', res[:4])[0]
+                        # gas_value1 = struct.unpack('IIII', res)[1]
+                        # flame_value2 = struct.unpack('iiii', res)[2]
+                        # gas_value2 = struct.unpack('<IIII', res)[3]
+
+                        # flame_value1 = res[:4].decode('utf-8')
+                        # # flame_value1 = int(flame_value1)
+                        # gas_value1 = res[4:8].decode('utf-8')
+                        # # gas_value1 = int(gas_value1)
+                        # flame_value2 = res[8:12].decode('utf-8')
+                        # # flame_value2 = int(flame_value2)
+                        # gas_value2 = res[12:].decode('utf-8')
+                        # # gas_value2 = int(gas_value2)
+
+                        print(flame_value1,gas_value1,flame_value2,gas_value2)
                         self.updateSensorValue.emit()
                     elif cmd == "GR":
                         self.detected.emit(int.from_bytes(res[2:6],"little"))
@@ -71,13 +98,13 @@ class Camera(QThread):
     def stop(self):
         self.running = False
 
-from_class = uic.loadUiType("/home/zeki/dev_ws/git_ws/iot-repo-4/Monitoring_system/userMonitor.ui")[0]
+from_class = uic.loadUiType("/home/yhseo/dev_ws/git_ws/iot-repo-4/Monitoring_system/userMonitor.ui")[0]
 
 class WindowClass(QMainWindow, from_class) :
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        
+        self.initSQL()
         self.setWindowTitle("Hello, Qt!")
         # codes for cam
         self.isCameraOn = False
@@ -91,17 +118,14 @@ class WindowClass(QMainWindow, from_class) :
         self.btn_camera.clicked.connect(self.clickCamera)######
         self.camera.update.connect(self.updateCamera)
 
-    
+        #large db screen hide
+        self.groupBox.hide()
 
         # setting variables
         self.sensor_timer_interval = 500
         self.RFID_timer_interval = 500
-        self.flame_criterion =300
-        self.gas_criterion = 300
-        self.camera_up_limit = 50
-        self.camera_down_limit = 20
-        self.camera_left_limit = 0
-        self.camera_right_limit = 180
+        self.flame_criterion =200
+        self.gas_criterion = 200
 
         # default flags
         self.fire_conn_flag = False
@@ -126,15 +150,16 @@ class WindowClass(QMainWindow, from_class) :
             except:
                 self.fire_conn_flag = False
                 self.try_count+=1
-                time.sleep(1)
+                print(self.try_count)
         if self.fire_conn_flag == False and self.try_count>= 5:
+            print("###############3endMessage################")
+            print("###############3endProgram################")
             self.reply = QMessageBox.critical(self,"Error", "Failed to connect fireDetector Unit",QMessageBox.Ok)
             if self.reply:
                 sys.exit(0)
         self.fire_recv = Receiver(self.fire_conn)
         self.fire_recv.start()
         self.try_count=0
-
         # connection of safetyControl_Unit
         while self.safety_conn_flag == False and self.try_count < 5:
             try:
@@ -144,6 +169,7 @@ class WindowClass(QMainWindow, from_class) :
                 self.safety_conn_flag = False
                 self.try_count+=1
         if self.safety_conn_flag == False and self.try_count>= 5:
+            print("###############3check error Message################")
             QMessageBox.critical(self,"Error", "Failed to connect safetyControl Unit",QMessageBox.Ok)
             self.safety_conn = object()
         if self.safety_conn_flag:
@@ -179,11 +205,13 @@ class WindowClass(QMainWindow, from_class) :
         self.flame1_test.clicked.connect(self.flame1test)
         self.flame2_test.clicked.connect(self.flame2test)
         self.updateValue.clicked.connect(self.updateSensorValue)
-        self.search_button.clicked.connect(self.print_database) # 임시버튼 혹은 아닌
+        self.enlarge_button.clicked.connect(self.show_database_enlarge)
+        self.exit_button.clicked.connect(self.exit_database_enlarge)
+        self.notull_button.clicked.connect(self.show_notnull_data)
 
-        #test database putout
+    #database putout
     def print_database(self):
-        self.cursor.execute("select * from fireIncident")  
+        self.cursor.execute("SELECT * FROM (SELECT * FROM fireIncident ORDER BY id DESC LIMIT 5) AS subquery ORDER BY id ASC;") 
 
         self.log_tableWidget.setRowCount(0);  
         for value in self.cursor.fetchall():
@@ -199,6 +227,56 @@ class WindowClass(QMainWindow, from_class) :
             self.log_tableWidget.setItem(row, 6, QTableWidgetItem(str(value[6])))
             self.log_tableWidget.setItem(row, 7, QTableWidgetItem(str(value[7])))
             self.log_tableWidget.setItem(row, 8, QTableWidgetItem(str(value[8])))
+
+    def exit_database_enlarge(self):
+        self.groupBox.hide()
+
+    def show_database_enlarge(self):
+        self.groupBox.show()
+
+    def show_notnull_data(self):
+        self.cursor.execute("""SELECT *FROM fireIncident 
+                            WHERE flame_occurrence IS NOT NULL 
+                            AND flame_sensor IS NOT NULL 
+                            AND flame_value IS NOT NULL 
+                            AND gas_occurrence IS NOT NULL 
+                            AND gas_sensor IS NOT NULL
+                            AND gas_value AND termination IS NOT NULL 
+                            AND termination_info IS NOT NULL;""")  
+        self.log_tableWidget_2.setRowCount(0);  
+        for value in self.cursor.fetchall():
+            
+            row  = self.log_tableWidget_2.rowCount() 
+            self.log_tableWidget_2.insertRow(row)
+            self.log_tableWidget_2.setItem(row, 0, QTableWidgetItem(str(value[0])))
+            self.log_tableWidget_2.setItem(row, 1, QTableWidgetItem(str(value[1])))
+            self.log_tableWidget_2.setItem(row, 2, QTableWidgetItem(str(value[2])))
+            self.log_tableWidget_2.setItem(row, 3, QTableWidgetItem(str(value[3])))
+            self.log_tableWidget_2.setItem(row, 4, QTableWidgetItem(str(value[4])))
+            self.log_tableWidget_2.setItem(row, 5, QTableWidgetItem(str(value[5])))
+            self.log_tableWidget_2.setItem(row, 6, QTableWidgetItem(str(value[6])))
+            self.log_tableWidget_2.setItem(row, 7, QTableWidgetItem(str(value[7])))
+            self.log_tableWidget_2.setItem(row, 8, QTableWidgetItem(str(value[8])))        
+        
+    #enlarge database putout
+    def print_database_enlarge(self):
+        
+        self.cursor.execute("select * from fireIncident")  
+
+        self.log_tableWidget_2.setRowCount(0);  
+        for value in self.cursor.fetchall():
+            
+            row  = self.log_tableWidget_2.rowCount() 
+            self.log_tableWidget_2.insertRow(row)
+            self.log_tableWidget_2.setItem(row, 0, QTableWidgetItem(str(value[0])))
+            self.log_tableWidget_2.setItem(row, 1, QTableWidgetItem(str(value[1])))
+            self.log_tableWidget_2.setItem(row, 2, QTableWidgetItem(str(value[2])))
+            self.log_tableWidget_2.setItem(row, 3, QTableWidgetItem(str(value[3])))
+            self.log_tableWidget_2.setItem(row, 4, QTableWidgetItem(str(value[4])))
+            self.log_tableWidget_2.setItem(row, 5, QTableWidgetItem(str(value[5])))
+            self.log_tableWidget_2.setItem(row, 6, QTableWidgetItem(str(value[6])))
+            self.log_tableWidget_2.setItem(row, 7, QTableWidgetItem(str(value[7])))
+            self.log_tableWidget_2.setItem(row, 8, QTableWidgetItem(str(value[8])))        
             
 
     # sql connect
@@ -260,7 +338,9 @@ class WindowClass(QMainWindow, from_class) :
                 (%s,%s,%s,%s,%s,%s)""",(occurr_time,occur_flame_loc,occur_flame_value, occurr_time,occur_gas_loc,occur_gas_value))
             
         self.sql_conn.commit()     
-    
+        self.print_database()
+        self.print_database_enlarge()
+
     #sql data update
     def sql_data_update(self,data=3):
         occurr_time = datetime.now()
@@ -303,9 +383,10 @@ class WindowClass(QMainWindow, from_class) :
             else:
                 self.cursor.execute("""update fireIncident SET termination=%s, termination_info=%s WHERE id =%s
                             """,(occurr_time,"RFID TAG" ,latest_id))
-        self.sql_conn.commit()     
-
-    # test funciton ###################3
+        self.sql_conn.commit()         
+        self.print_database()
+        self.print_database_enlarge()
+    # test funciton
     def gas1test(self):
         global gas_value1
         gas_value1 += 10
@@ -356,6 +437,8 @@ class WindowClass(QMainWindow, from_class) :
         self.send_fireD(b"GS")
         print("getSensor")
 
+        self.setValue()
+
     # getRFID
     def getRFID(self):
         self.send_safeC(b"GR")
@@ -365,11 +448,10 @@ class WindowClass(QMainWindow, from_class) :
     def updateSensorValue(self):
         print("updateSensorValue")
         global flame_value1, flame_value2, gas_value1, gas_value2
-        # self.gas_value1_label.setText(str(gas_value1))
-        # self.gas_value2_label.setText(str(gas_value2))
-        # self.flame_value1_label.setText(str(flame_value1))
-        # self.flame_value2_label.setText(str(flame_value2))
-        self.setValue()
+        self.gas_value1_label.setText(str(gas_value1))
+        self.gas_value2_label.setText(str(gas_value2))
+        self.flame_value1_label.setText(str(flame_value1))
+        self.flame_value1_label.setText(str(flame_value2))
 
         self.flag_list[0]=(1 if (flame_value1 > self.flame_criterion) else self.flag_list[0])
         self.flag_list[1]=(1 if (gas_value1 > self.gas_criterion) else self.flag_list[1])
@@ -386,31 +468,39 @@ class WindowClass(QMainWindow, from_class) :
                     pass
             else:
                 self.sensor_loc = 0
-        gas_fire_flag = (self.flag_list[1]+self.flag_list[3] != 0, 
-                         self.flag_list[0]+self.flag_list[2] != 0)
+        gas_fire_flag = (self.flag_list[1]+self.flag_list[3] != 0, self.flag_list[0]+self.flag_list[2] != 0)
+        print(gas_fire_flag)
         # print(self.flag_list.index(1)/2)
         if True in gas_fire_flag:
             if gas_fire_flag == (False, True):
                 self.prev_IS = self.curr_IS
                 self.curr_IS = 1
-                self.flame_led_button.setStyleSheet("background-color: red")
+                self.flame_led_button.setStyleSheet("background-color: red;") #####################################
+
             elif gas_fire_flag == (True, False):
+                print("Im in gasfireflag TF")
                 self.prev_IS = self.curr_IS
                 self.curr_IS = 2
-                self.gas_led_button.setStyleSheet("background-color: yellow")
+                self.gas_led_button.setStyleSheet("background-color: yellow") #####################################
             elif gas_fire_flag == (True, True):
                 self.prev_IS = self.curr_IS
                 self.curr_IS = 3
-                self.flame_led_button.setStyleSheet("background-color: red")
-                self.gas_led_button.setStyleSheet("background-color: yellow")
+                self.flame_led_button.setStyleSheet("background-color: red") #####################################
+                self.gas_led_button.setStyleSheet("background-color: yellow") #####################################
+            
+
+            print(self.prev_IS,self.curr_IS)
             if self.prev_IS != self.curr_IS:
                 self.send_safeC(b'IS',self.curr_IS,self.sensor_loc) #self.curr_IS is int
-                self.sql_data_update() ##############################################db 업데이트 하는 곳
+                print(self.flag_list)
+                if(self.prev_IS !=0):
+                    self.sql_data_update() ##############################################db 업데이트 하는 곳
             if self.indoor_flag == False:
                 self.RFID_timer.start()
                 self.clickCamera() #displayCamera check indoor_flag and turn on if flag is true, off when false
                                         # or separate to activeCamera() deactiveCamera()
                 self.sql_data_insert() #상황 발생 시 db 데이터 삽입 *********수정가능*******
+
             self.indoor_flag = True
             self.enable_cam_deactivate()
             if 1 in [self.flag_list[0],self.flag_list[2]]:
@@ -451,12 +541,12 @@ class WindowClass(QMainWindow, from_class) :
     # funciton of deactiveButton
     def deactivateButton(self, data = 3):
         print("deactive")
+        print("data값은 : " ,data, "입니다")
         if data == 0:
-            # QMessageBox.critical(self,"Error", "unknown error",QMessageBox.Ok)#######################################################3
-            pass
+            QMessageBox.critical(self,"Error", "unknown error",QMessageBox.Ok)
         elif data ==1:
-            # QMessageBox.critical(self,"Error", "has occured, unauthorized",QMessageBox.Ok) ##################################################3
-            pass
+            QMessageBox.critical(self,"Error", "has occured, unauthorized",QMessageBox.Ok)
+
         else:
             self.sensor_loc = 0
             self.prev_IS = 0
@@ -468,7 +558,7 @@ class WindowClass(QMainWindow, from_class) :
             self.indoor_flag = False
             self.RFID_timer.stop()
 
-            self.clickCamera()
+         #   self.clickCamera()
             #############33
 
             self.disable_cam_deactivate()
@@ -480,29 +570,30 @@ class WindowClass(QMainWindow, from_class) :
 
             print("deactivateButton")
             print(self.prev_IS,self.curr_IS)
+            
             self.sql_data_update(data) #############################################db update 하는곳
 
     # function of cameraUpButton
     def cameraUpButton(self):
-        self.y_degree -= 10
-        if self.y_degree <20:
-            self.y_degree = 20
+        self.y_degree += 10
+        if self.y_degree >100:
+            self.y_degree = 100
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
         print("cameraUpButton")
     
     # function of cameraDownButton
     def cameraDownButton(self):
-        self.y_degree += 10
-        if self.y_degree >self.camera_up_limit:
-            self.y_degree = self.camera_up_limit
+        self.y_degree -= 10
+        if self.y_degree <0:
+            self.y_degree = 0
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
         print("cameraDownButton")
     
     # function of cameraLeftButton
     def cameraLeftButton(self):
-        self.x_degree -= 10
-        if self.x_degree <self.camera_left_limit:
-            self.x_degree = self.camera_left_limit
+        self.x_degree += 10
+        if self.x_degree >100:
+            self.x_degree = 100
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
@@ -510,9 +601,9 @@ class WindowClass(QMainWindow, from_class) :
     
     # function of cameraRightButton
     def cameraRightButton(self):
-        self.x_degree += 10
-        if self.x_degree >self.camera_right_limit:
-            self.x_degree = self.camera_right_limit
+        self.x_degree -= 10
+        if self.x_degree <0:
+            self.x_degree = 0
         if self.x_degree == 10:
             self.x_degree = 11
         self.send_safeC(b"CC",self.x_degree,self.y_degree)
@@ -563,7 +654,7 @@ class WindowClass(QMainWindow, from_class) :
         #     self.mp4Stop()
         self.camera.running = True
         self.camera.start()
-        self.video = cv2.VideoCapture(2)
+        self.video = cv2.VideoCapture(-1)
     
     def cameraStop(self):
         self.camera.running = False
