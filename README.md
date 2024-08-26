@@ -49,9 +49,94 @@
   ![eos](https://github.com/user-attachments/assets/feb24d92-f50c-4022-bae6-eff1a0478d4f)
 
 ### 통신 프로토콜 정의
-![communication_protocol](https://github.com/user-attachments/assets/5e20ab46-04f4-496f-bf61-76a1b0ab3021)
-![command_list](https://github.com/user-attachments/assets/5adad7cc-73fb-4944-811b-9f1ae88d8d8e)
-![packet_structure](https://github.com/user-attachments/assets/93b590bc-4848-4f11-a389-4407652e6525)
+## Communication Protocol
+|Transmitter|Receiver|Communication Protocol|
+|-----|-----|-----|
+|Host PC (USB Port 1)|fireDetector Unit|Serial Peripheral Interface Protocol|
+|fireDetector Unit|Host PC (USB Port 1)|Protocol|
+|Host PC (USB Port 2)|safetyControl Unit|Serial Peripheral Interface Protocol|
+|safetyControl Unit|Host PC (USB Port 2)|Protocol|
+|camera|Host PC (USB port 3)|Picture Transfer Protocol|
+
+## Command List
+<table>
+  <thead>
+    <tr>
+      <th>Transmitter</th>
+      <th>Command</th>
+      <th>Full Name</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan=5>Host PC</td>
+      <td rowspan=1>IS</td>
+      <td>Indoor Status</td>
+      <td>retrieve indoor room status through two sensors, inform current status using the status code: 0, 1, 2 or 3 {0:Normal, 1:Flame, 2:Gas, 3: Both sensors} and inform where camera should point at using the direction code: 0, 1 or 2 {0: default, 1:SensorModule1, 2: SensorModule2}.</td>
+    </tr>
+    <tr>
+      <td rowspan=1>CC</td>
+      <td>Camera Control</td>
+      <td>control X and Y-axis of the camera, pass two integers</td>
+    </tr>
+    <tr>
+      <td rowspan=1>VC</td>
+      <td>Ventilator Control</td>
+      <td>send OFF/ON status code (0 or 1) [0: OFF, 1: ON]</td>
+    </tr>
+    <tr>
+      <td rowspan=1>GR</td>
+      <td>Get RFID</td>
+      <td>get the status of RFID, if tagged send turn off  signal</td>
+    </tr>
+    <tr>
+      <td rowspan=1>GS</td>
+      <td>Get Sensor values</td>
+      <td>get Sensor data from fireDetector Unit</td>
+    </tr>
+    <tr>
+      <td rowspan=1>fireDetector</td>
+      <td> GS</td>
+      <td>Get Sensor</td>
+      <td> send integer sensor values from 2 different modules: SensorModule1(flameInfo1, gasInfo1) and SensorModule2(flameInfo2, gasInfo2) to the host PC</td>
+    </tr>
+    <tr>
+      <td rowspan=1>safetyControl</td>
+      <td> GR</td>
+      <td>Get RFID</td>
+      <td> send signal: 0 if unknown error has occured, 1 if unauthorized RFID transponder is tagged, 2 if authorized RFID transponder is tagged</td>
+    </tr>
+  </tbody>
+</table>
+
+
+## Packet Structure
+<table>
+    <thead>
+        <tr>
+            <th colspan=2> Command for Host  PC to fireDetector Unit</th>
+        </tr>
+        <tr>
+            <th> Command ID </th>
+            <th> End byte </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td> 2 bytes </td>
+            <td> 1 byte </td>
+        </tr>
+        <tr>
+        </tr>
+        <tr>
+            <td> GS </td>
+            <td> \n </td>
+        </tr>
+        <tr>
+        </tr>
+    </tbody>
+</table>
 
 ### Hardware / Wiring
 - photo
