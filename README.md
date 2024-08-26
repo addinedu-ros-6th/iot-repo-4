@@ -4,22 +4,22 @@
 ### 주제 소개
 - 주제
 ### 기술 스택
-|Category|Skills and Tools|
-|:---:|:---:|
-|IDE/OS| ![js](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)![js](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)![js](https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white)![js](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) <img src= "https://img.shields.io/badge/Arduino_IDE-00979D?style=for-the-badge&logo=arduino&logoColor=white" /> |
+|분류|기술|
+|-----|-----|
+|개발| ![js](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white) ![js](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) ![js](https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white) ![js](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) <img src= "https://img.shields.io/badge/Arduino_IDE-00979D?style=for-the-badge&logo=arduino&logoColor=white" /> |
 |GUI| <img src="https://img.shields.io/badge/PyQt5-21C25E?style=for-the-badge&logo=quicktype"> |
-|--| <img src="https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=OpenCV"> |
-|Collaboration| ![js](https://img.shields.io/badge/GIT-E44C30?style=for-the-badge&logo=git&logoColor=white)![js](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)![js](https://img.shields.io/badge/confluence-%23172BF4.svg?style=for-the-badge&logo=confluence&logoColor=white)![js](https://img.shields.io/badge/Jira-0052CC?style=for-the-badge&logo=Jira&logoColor=white)![js](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)|
+|영상처리| <img src="https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=OpenCV"> |
+|협업| ![js](https://img.shields.io/badge/GIT-E44C30?style=for-the-badge&logo=git&logoColor=white) ![js](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white) ![js](https://img.shields.io/badge/confluence-%23172BF4.svg?style=for-the-badge&logo=confluence&logoColor=white) ![js](https://img.shields.io/badge/Jira-0052CC?style=for-the-badge&logo=Jira&logoColor=white) ![js](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)|
 
 
 ## 팀원 소개
 
-|김재창 (Project Leader)|고선민 |서영환 |이경민 |
-|----|-----|----|-----|
-|요구사항 분석 및 시스템 설계, 설계/테스트 정보 문서화| 하드웨어 설계, 마이크로프로세서 모듈 통합/검증| 시스템 설계/검증, DB 구축/관리 | 시스템 통합/검증, 통신 프로토콜 설계, GUI 구현|
-
-
-
+|이름|담당|
+|----|-----|
+|김재창 <br> (Project Leader)|요구사항 분석 및 시스템 설계 <br> 설계/테스트 정보 문서화| 
+|고선민|하드웨어 설계 <br> 마이크로프로세서 모듈 통합/검증|
+|서영환|시스템 설계/검증 <br> DB 구축/관리| 
+|이경민|시스템 통합/검증 <br> 통신 프로토콜 설계 <br> GUI 구현|
 
 ## 사용자 요구사항 분석
 ### 기능적 목표
@@ -34,22 +34,27 @@
 ## 시스템 아키텍처
 ### 상태 정의
 - 상태 전이도
+  
 ![state_transition_diagram](https://github.com/user-attachments/assets/4b0194b7-ce89-4f23-89f2-79a7955c9ff8)
 
 ### 시스템 설계
 - 시스템 구성도
+  
 ![system_arch](https://github.com/user-attachments/assets/0351d1a8-2d8e-4f0c-b182-472562c5726a)
 
 ### 주요 시나리오
 - 상황 발생 시나리오 시퀀스 다이어그램
+  
   ![oos](https://github.com/user-attachments/assets/d62810d8-2872-45fe-81cd-16cfd23f0ac1)
 - 카메라 수동 조작 시나리오 시퀀스 다이어그램
+  
   ![mcc](https://github.com/user-attachments/assets/2d4225d5-a298-42d8-954a-15847a62b453)
 - 상황 종료 시나리오 시퀀스 다이어그램
+  
   ![eos](https://github.com/user-attachments/assets/feb24d92-f50c-4022-bae6-eff1a0478d4f)
 
 ### 통신 프로토콜 정의
-## Communication Protocol
+#### Communication Protocol List
 |Transmitter|Receiver|Communication Protocol|
 |-----|-----|-----|
 |Host PC (USB Port 1)|fireDetector Unit|Serial Peripheral Interface Protocol|
@@ -58,7 +63,7 @@
 |safetyControl Unit|Host PC (USB Port 2)|Protocol|
 |camera|Host PC (USB port 3)|Picture Transfer Protocol|
 
-## Command List
+#### Command List
 <table>
   <thead>
     <tr>
@@ -111,7 +116,7 @@
 </table>
 
 
-## Packet Structure
+#### Packet Structure
 <table>
     <thead>
         <tr>
@@ -138,17 +143,14 @@
     </tbody>
 </table>
 
-### Hardware / Wiring
-- photo
-
 ### GUI 설계
 ![GUI](https://github.com/user-attachments/assets/073fa5ec-52f0-416e-82fb-5e6495403e87)
-- contents
 
 ### Database 설계
 - ERD
+  
 ![ERD](https://github.com/user-attachments/assets/62bd0db8-d9f0-49f1-8322-5d19a0c60a02)
 
-## Demo Video
+## 시현 영상
 [![Watch the video](https://github.com/user-attachments/assets/64dde2a7-0494-4401-9b6e-c69f5848bcb0)](https://drive.google.com/file/d/1hy1FeOyQ_F7rgvRvqLCTZ0Ngx3BC0v6t/view?usp=drive_link)
-- After gas and flame sensor detection, end the incident by tagging a registered (authorized) card on the RFID module
+- 센서가 순차적으로 가스 누출 감지, 불꽃 감지 이후 자동으로 상황 발령, 관리자가 허가된 카드를 RFID 모듈을 태그하며 상황 종료
