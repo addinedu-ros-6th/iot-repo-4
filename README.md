@@ -67,25 +67,21 @@ terminate situation
 - End-of-Situation Scenario
   ![eos](https://github.com/user-attachments/assets/feb24d92-f50c-4022-bae6-eff1a0478d4f)
 
-## Serial Communication Protocol
+### Serial Communication Protocol
 ![communication_protocol](https://github.com/user-attachments/assets/5e20ab46-04f4-496f-bf61-76a1b0ab3021)
 ![command_list](https://github.com/user-attachments/assets/5adad7cc-73fb-4944-811b-9f1ae88d8d8e)
 ![packet_structure](https://github.com/user-attachments/assets/93b590bc-4848-4f11-a389-4407652e6525)
 
-## Hardware / Wiring
+### Hardware / Wiring
 - photo
 
-## GUI Design
+### GUI Design
 ![GUI](https://github.com/user-attachments/assets/073fa5ec-52f0-416e-82fb-5e6495403e87)
 - contents
 
-## DB Schema
+### DB Schema
 ![ERD](https://github.com/user-attachments/assets/8f79eb86-4841-45c1-9d9e-b1f276fc6373)
 
 ## Demo Video
 [![Watch the video](https://github.com/user-attachments/assets/64dde2a7-0494-4401-9b6e-c69f5848bcb0)](https://drive.google.com/file/d/1hy1FeOyQ_F7rgvRvqLCTZ0Ngx3BC0v6t/view?usp=drive_link)
 - After gas and flame sensor detection, end the incident by tagging a registered (authorized) card on the RFID module
-
-## Unit Test
-- contents / diagram
-
