@@ -17,14 +17,40 @@
 
 |Name|Tasks|
 |----|-----|
-|영문이름 (Leader)|맡은일|
-|영문이름 |맡은일|
-|영문이름 |맡은일|
-|영문이름 |맡은일|
+|김재창 (Project Leader)|Requirements analysis and system design|
+| |Document design/test information|
+|고선민 |Hardware design|
+| |Microprocessor module integration/verification|
+|서영환 |System design/verification|
+| |DB construction/management|
+|이경민 |System design/verification|
+| |Communication protocol design|
+| |GUI implementation|
 
 ## User Requirement Analysis
-- contents
-  
+### Functional Goals 
+An automated system that monitors the indoor environment in real time and automatically detects, warns and responds to filame and gas leaks
+A system that allows managers to judge and resolve situations both directly on site and remotely  
+
+### Technology Goals
+A system that controls the I/O of multiple sensor modules and motors with a microprocessor
+GUI-based system where the master PC detects/responds to the possibility of indoor fire in real time
+
+### Derived Requirements
+fire detection
+- Collect sensor data and transmit to host computer
+- Issue an alert when a situation occurs
+
+remote control
+- Operate omni-directional camera, solving blind spot problem
+- The situation is terminated when the administrator determines that there is no problem.
+
+on-site control
+- Separate module that allows on-site managers to judge the situation and resolve the situation 
+
+terminate situation
+- Save and retrieve information about situations that have occurred
+
 ## System Architecture Design
 
 ### Status Diagram
