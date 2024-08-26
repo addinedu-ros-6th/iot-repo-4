@@ -28,26 +28,33 @@
 ## System Architecture Design
 
 ### Status Diagram
-- contents / diagram
+![state_transition_diagram](https://github.com/user-attachments/assets/4b0194b7-ce89-4f23-89f2-79a7955c9ff8)
 
 ### System Design
-- contents / diagram
+![system_arch](https://github.com/user-attachments/assets/f5a53738-4222-4405-adbe-31200a9cf348)
 
-### Scenario (Sequence) Diagram
-- contents / diagram
+### Major Scenarios 
+- Occurrence-of-Situation Scenario
+  ![oos](https://github.com/user-attachments/assets/d62810d8-2872-45fe-81cd-16cfd23f0ac1)
+- Manual Camera Control Scenario
+  ![mcc](https://github.com/user-attachments/assets/2d4225d5-a298-42d8-954a-15847a62b453)
+- End-of-Situation Scenario
+  ![eos](https://github.com/user-attachments/assets/feb24d92-f50c-4022-bae6-eff1a0478d4f)
 
 ## Serial Communication Protocol
-- diagram
-- explanation
+![communication_protocol](https://github.com/user-attachments/assets/5e20ab46-04f4-496f-bf61-76a1b0ab3021)
+![command_list](https://github.com/user-attachments/assets/5adad7cc-73fb-4944-811b-9f1ae88d8d8e)
+![packet_structure](https://github.com/user-attachments/assets/93b590bc-4848-4f11-a389-4407652e6525)
 
 ## Hardware / Wiring
 - photo
 
 ## GUI Design
-- contents / diagram
+![GUI](https://github.com/user-attachments/assets/073fa5ec-52f0-416e-82fb-5e6495403e87)
+- contents
 
 ## DB Schema
-- contents / diagram
+![ERD](https://github.com/user-attachments/assets/8f79eb86-4841-45c1-9d9e-b1f276fc6373)
 
 ## Demo Video
 [![Watch the video](https://github.com/user-attachments/assets/64dde2a7-0494-4401-9b6e-c69f5848bcb0)](https://drive.google.com/file/d/1hy1FeOyQ_F7rgvRvqLCTZ0Ngx3BC0v6t/view?usp=drive_link)
@@ -56,5 +63,3 @@
 ## Unit Test
 - contents / diagram
 
-## Conclusion
-- contents
