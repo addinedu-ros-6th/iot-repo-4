@@ -2,13 +2,15 @@
 
 ## 개요
 ### 주제 소개
-- 주제
+- 시스템이 화재 발생 가능성을 실시간으로 감지 및 대응하고, 사용자는 GUI 또는 현장의 경보 모듈을 통해 상황을 파악하여 대처할 수 있도록 지원하는 서비스입니다.
 ### 기술 스택
 |분류|기술|
 |-----|-----|
-|개발| ![js](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white) ![js](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) ![js](https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white) ![js](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white) <img src= "https://img.shields.io/badge/Arduino_IDE-00979D?style=for-the-badge&logo=arduino&logoColor=white" /> |
-|GUI| <img src="https://img.shields.io/badge/PyQt5-21C25E?style=for-the-badge&logo=quicktype"> |
+|개발 언어|![js](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white) ![js](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)|
 |영상처리| <img src="https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=OpenCV"> |
+|UI| <img src="https://img.shields.io/badge/PyQt5-21C25E?style=for-the-badge&logo=quicktype"> |
+|DBMS|![js](https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white)|
+|개발 환경|![js](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=Ubuntu&logoColor=white) <img src= "https://img.shields.io/badge/Arduino_IDE-00979D?style=for-the-badge&logo=arduino&logoColor=white" />|
 |협업| ![js](https://img.shields.io/badge/GIT-E44C30?style=for-the-badge&logo=git&logoColor=white) ![js](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white) ![js](https://img.shields.io/badge/confluence-%23172BF4.svg?style=for-the-badge&logo=confluence&logoColor=white) ![js](https://img.shields.io/badge/Jira-0052CC?style=for-the-badge&logo=Jira&logoColor=white) ![js](https://img.shields.io/badge/Slack-4A154B?style=for-the-badge&logo=slack&logoColor=white)|
 
 
@@ -40,7 +42,7 @@
 ### 시스템 설계
 - 시스템 구성도
   
-![system_arch](https://github.com/user-attachments/assets/0351d1a8-2d8e-4f0c-b182-472562c5726a)
+  ![new_system](https://github.com/user-attachments/assets/d74de1b6-dfab-4ced-ac4a-759b9d4cb915)
 
 ### 주요 시나리오
 - 상황 발생 시나리오 시퀀스 다이어그램
