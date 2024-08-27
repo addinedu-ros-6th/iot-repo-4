@@ -42,7 +42,7 @@
 ### 시스템 설계
 - 시스템 구성도
   
-  ![new_system](https://github.com/user-attachments/assets/d74de1b6-dfab-4ced-ac4a-759b9d4cb915)
+  ![new_new_system](https://github.com/user-attachments/assets/ad7cc2df-2375-426c-b0eb-918d9c39370e)
 
 ### 주요 시나리오
 - 상황 발생 시나리오 시퀀스 다이어그램
