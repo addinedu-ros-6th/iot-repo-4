@@ -60,9 +60,9 @@
 |Transmitter|Receiver|Communication Protocol|
 |-----|-----|-----|
 |Host PC (USB Port 1)|fireDetector Unit|Serial Peripheral Interface Protocol|
-|fireDetector Unit|Host PC (USB Port 1)|Protocol|
+|fireDetector Unit|Host PC (USB Port 1)|Serial Peripheral Interface Protocol|
 |Host PC (USB Port 2)|safetyControl Unit|Serial Peripheral Interface Protocol|
-|safetyControl Unit|Host PC (USB Port 2)|Protocol|
+|safetyControl Unit|Host PC (USB Port 2)|Serial Peripheral Interface Protocol|
 |camera|Host PC (USB port 3)|Picture Transfer Protocol|
 
 #### Command List
@@ -135,12 +135,117 @@
             <td> 1 byte </td>
         </tr>
         <tr>
-        </tr>
-        <tr>
             <td> GS </td>
             <td> \n </td>
         </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
         <tr>
+            <th colspan=6> Command for fireDetector Unit to Host PC</th>
+        </tr>
+        <tr>
+            <th> Command ID </th>
+            <th> Data1 </th>
+            <th> Data2 </th>
+            <th> Data3 </th>
+            <th> Data4 </th>
+            <th> End byte </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td> 2 bytes </td>
+            <td> 4 bytes </td>
+            <td> 4 bytes </td>
+            <td> 4 bytes </td>
+            <td> 4 bytes </td>
+            <td> 1 byte </td>
+        </tr>
+        <tr>
+        </tr>
+        <tr>
+            <td> GS </td>
+            <td> (int) Sensor1 Value </td>
+            <td> (int) Sensor2 Value </td>
+            <td> (int) Sensor3 Value </td>
+            <td> (int) Sensor4 Value </td>
+            <td> \n </td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th colspan=6> Command for Host PC to safetyControl Unit </th>
+        </tr>
+        <tr>
+            <th> Command ID </th>
+            <th> Data1 </th>
+            <th> Data2 </th>
+            <th> End byte </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td> 2 bytes </td>
+            <td> 4 bytes </td>
+            <td> 4 bytes </td>
+            <td> 1 byte </td>
+        </tr>
+        <tr>
+        </tr>
+        <tr>
+            <td> IS </td>
+            <td> (int) State [0,1, 2, 3] </td>
+            <td> (int) (int) Camera Direction Info [0, 1, 2] </td>
+            <td> \n </td>
+        </tr>
+        <tr>
+            <td> CC </td>
+            <td> (int) Degree </td>
+            <td> (int) Degree </td>
+            <td> \n </td>
+        </tr>
+        <tr>
+            <td> VC </td>
+            <td> (int) State[0,1] </td>
+            <td> - </td>
+            <td> \n </td>
+        </tr>
+        <tr>
+            <td> GR </td>
+            <td> - </td>
+            <td> - </td>
+            <td> \n </td>
+        </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th colspan=3>  Command for safetyControl Unit to Host PC </th>
+        </tr>
+        <tr>
+            <th> Command ID </th>
+            <th> Status </th>
+            <th> End byte </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td> 2 bytes </td>
+            <td> 4 bytes </td>
+            <td> 1 byte </td>
+        </tr>
+        <tr>
+            <td> GR </td>
+            <td> (int) State [0, 1, 2] </td>
+            <td> \n </td>
         </tr>
     </tbody>
 </table>
