@@ -122,28 +122,6 @@
 <table>
     <thead>
         <tr>
-            <th colspan=2> Command for Host  PC to fireDetector Unit</th>
-        </tr>
-        <tr>
-            <th> Command ID </th>
-            <th> End byte </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td> 2 bytes </td>
-            <td> 1 byte </td>
-        </tr>
-        <tr>
-            <td> GS </td>
-            <td> \n </td>
-        </tr>
-    </tbody>
-</table>
-
-<table>
-    <thead>
-        <tr>
             <th colspan=6> Command for fireDetector Unit to Host PC</th>
         </tr>
         <tr>
@@ -220,31 +198,6 @@
             <td> GR </td>
             <td> - </td>
             <td> - </td>
-            <td> \n </td>
-        </tr>
-    </tbody>
-</table>
-
-<table>
-    <thead>
-        <tr>
-            <th colspan=3>  Command for safetyControl Unit to Host PC </th>
-        </tr>
-        <tr>
-            <th> Command ID </th>
-            <th> Status </th>
-            <th> End byte </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td> 2 bytes </td>
-            <td> 4 bytes </td>
-            <td> 1 byte </td>
-        </tr>
-        <tr>
-            <td> GR </td>
-            <td> (int) State [0, 1, 2] </td>
             <td> \n </td>
         </tr>
     </tbody>
